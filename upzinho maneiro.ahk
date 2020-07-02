@@ -13,7 +13,7 @@ CoordMode, Pixel, Relative
 
 AdjustScreenScale:
 
-ImageSearch, tradecenterX, tradecenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, tradeCenter1.png
+ImageSearch, tradecenterX, tradecenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/tradeCenter1.png
 if ErrorLevel = 1
 	goto, AdjustScreenScale
 	
@@ -31,7 +31,7 @@ MouseMove, X, Y
 
 FindBattleMenu:
 
-ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, battlemenu.png
+ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/battlemenu.png
 if ErrorLevel = 1
 	goto, FindBattleMenu
 
@@ -39,7 +39,7 @@ battlemenuX -= 5
 
 FindMiniMap:
 	
-ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, minimap.png
+ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/minimap.png
 if ErrorLevel = 1
 	goto, FindMiniMap
 	
@@ -47,12 +47,12 @@ Tooltip, Adjusting CD's, 100, 100
 
 FindCD:
 
-ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *50 cdmenu.png
+ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *50 ./images/cdmenu.png
 if (ErrorLevel = 1) {
 		goto, FindCD
 } else {
 	FindTyph:
-	ImageSearch typhX, typhY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 typh.png
+	ImageSearch typhX, typhY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/typh.png
 	if (ErrorLevel = 0) {
 		MouseMove, typhX + 16, typhY + 16
 		sleep, 40
@@ -62,7 +62,7 @@ if (ErrorLevel = 1) {
 		sleep, 40
 		Send {XButton2}
 		FindMax:
-		ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF max.png
+		ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./images/max.png
 		If ErrorLevel = 1
 			goto, FindMax
 		sleep, 300
@@ -87,7 +87,7 @@ MouseMove, X, Y
 
 FindCD1:
 
-ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 cdmenu.png
+ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/cdmenu.png
 if ErrorLevel = 1
 	goto, FindCD1
 
@@ -103,7 +103,7 @@ CoordMode, Pixel, Relative
 
 RevStart:
 
-ImageSearch, pokemenuX, pokemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, pokemonmenu.png
+ImageSearch, pokemenuX, pokemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/pokemonmenu.png
 if (ErrorLevel = 0) {
 	RevX := pokemenuX
 	RevY := pokemenuY
@@ -121,7 +121,7 @@ RevEnd:
 Sleep, 200
 
 TC:
-ImageSearch, tradecenterX, tradecenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, tradeCenter1.png
+ImageSearch, tradecenterX, tradecenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/tradeCenter1.png
 if ErrorLevel = 1
 	goto, TC
 	
@@ -181,33 +181,33 @@ Send {XButton1}
 MouseMove, %X%, %Y%
 Offensive:
 Send ^{9}
-ImageSearch, Rs, Sr, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 Offensive.png
+ImageSearch, Rs, Sr, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 ./images/Offensive.png
 if ErrorLevel = 1
 	goto, Offensive
 CD6:
 Send {F6}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD6.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD6.png
 if ErrorLevel = 0
 	goto, CD6
 Send ^{8}
 CD7: 
 Send {F7}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD7.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD7.png
 if ErrorLevel = 0
 	goto, CD7
 CD5:
 Send {F5}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD5.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD5.png
 if ErrorLevel = 0
 	goto, CD5
 CD9:
 Send {F9}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD9.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD9.png
 if ErrorLevel = 0
 	goto, CD9
 CD8:
 Send {F8}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD8.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD8.png
 if ErrorLevel = 0
 	goto, CD8
 
@@ -219,7 +219,7 @@ MeganiumFound1 := 1
 MeganiumFound2 := 0
 
 CoordMode, Pixel, Relative
-ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 If ErrorLevel = 1
 	MeganiumFound1 = 0
 	
@@ -236,7 +236,7 @@ if (MeganiumFound1 = 0) {
 
 		MouseMove, %RevX%, %RevY%
 		Send {XButton2}
-		ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF max.png
+		ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF ./images/max.png
 		if ErrorLevel = 1 
 			goto,  Rev1
 
@@ -246,7 +246,7 @@ if (MeganiumFound1 = 0) {
 
 			if RevStop = 7
 				goto, Ok1
-			ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 revOut.png
+			ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 ./images/revOut.png
 			if (ErrorLevel = 1) {
 			
 				MouseMove, %RevX%, %RevY%
@@ -370,7 +370,7 @@ Rev2:
 MouseMove, %RevX%, %RevY%
 Send {XButton2}
 sleep, 20
-ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF max.png
+ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF ./images/max.png
 if ErrorLevel = 1 
 	goto,  Rev2
 
@@ -380,7 +380,7 @@ Loop {
 
 	if RevStop = 7
 		goto, Ok2
-	ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 revOut.png
+	ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 ./images/revOut.png
 	if (ErrorLevel = 1) {
 	
 		MouseMove, %RevX%, %RevY%
@@ -415,7 +415,7 @@ Send ^{Tab}
 
 sleep, 200
 
-ImageSearch, mapCenterX, mapCenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, mapcenter.png
+ImageSearch, mapCenterX, mapCenterY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/mapcenter.png
 if (ErrorLevel = 0) {
 	MouseMove, %mapCenterX%, %mapCenterY%
 	sleep, 40
@@ -433,25 +433,25 @@ Send ^{Tab}
 
 Sleep, 400
 
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure1f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure1f.png
 if ErrorLevel = 0
 	NextLure := 2
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure2f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure2f.png
 if ErrorLevel = 0
 	NextLure := 3
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure3f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure3f.png
 if ErrorLevel = 0
 	NextLure := 4
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure4f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure4f.png
 if ErrorLevel = 0
 	NextLure := 5
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure5f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure5f.png
 if ErrorLevel = 0
 	NextLure := 6
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure6f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure6f.png
 if ErrorLevel = 0
 	NextLure := 7
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure7f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure7f.png
 if ErrorLevel = 0
 	NextLure := 1
 
@@ -476,7 +476,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure1.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure1.png
 if ErrorLevel = 0
 	goto, Lure1a
 }
@@ -492,11 +492,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		if ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure1f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure1f.png
 		if (ErrorLevel = 0) {
 			goto, Lure2
 		}
@@ -511,7 +511,7 @@ Lure1b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure1f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure1f.png
 if ErrorLevel = 0
 	goto, Lure1c
 }
@@ -535,7 +535,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure2.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure2.png
 if ErrorLevel = 0
 	goto, Lure2a
 }
@@ -551,11 +551,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure2f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure2f.png
 		if (ErrorLevel = 0) {
 			goto, Lure3
 		}
@@ -570,7 +570,7 @@ Lure2b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure2f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure2f.png
 if ErrorLevel = 0
 	goto, Lure2c
 }
@@ -591,7 +591,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure3.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure3.png
 if ErrorLevel = 0
 	goto, Lure3a
 }
@@ -607,11 +607,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure3f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure3f.png
 		if (ErrorLevel = 0) {
 			goto, Lure4
 		}
@@ -626,7 +626,7 @@ Lure3b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure3f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure3f.png
 if ErrorLevel = 0
 	goto, Lure3c
 }
@@ -650,7 +650,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure4.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure4.png
 if ErrorLevel = 0
 	goto, Lure4a
 }
@@ -666,11 +666,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure4f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure4f.png
 		if (ErrorLevel = 0) {
 			goto, Lure5
 		}
@@ -685,7 +685,7 @@ Lure4b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure4f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure4f.png
 if ErrorLevel = 0
 	goto, Lure4c
 }
@@ -706,7 +706,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure5.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure5.png
 if ErrorLevel = 0
 	goto, Lure5a
 }
@@ -722,11 +722,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure5f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure5f.png
 		if (ErrorLevel = 0) {
 			goto, Lure6
 		}
@@ -741,7 +741,7 @@ Lure5b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure5f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure5f.png
 if ErrorLevel = 0
 	goto, Lure5c
 }
@@ -762,7 +762,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure6.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure6.png
 if ErrorLevel = 0
 	goto, Lure6a
 }
@@ -778,11 +778,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure6f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure6f.png
 		if (ErrorLevel = 0) {
 			goto, Lure7
 		}
@@ -797,7 +797,7 @@ Lure6b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure6f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure6f.png
 if ErrorLevel = 0
 	goto, Lure6c
 }
@@ -818,7 +818,7 @@ Tooltip, Searching Next Lure, 50, 50
 Send ^{Tab}
 Loop {
 Sleep, 200
-ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, Lure7.png
+ImageSearch, NextLureX, NextLureY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/Lure7.png
 if ErrorLevel = 0
 	goto, Lure7a
 }
@@ -834,11 +834,11 @@ Send ^{Tab}
 	Tooltip, Waiting for battle, 50, 50
 	Loop {
 		done1 := 0
-		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+		ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 		If ErrorLevel = 0
 			done1++	
 		else {
-		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure7f.png
+		ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure7f.png
 		if (ErrorLevel = 0) {
 			goto, Lure1
 		}
@@ -853,7 +853,7 @@ Lure7b:
 Tooltip
 Tooltip, Waiting Position, 50, 50
 Loop {
-ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, Lure7f.png
+ImageSearch, Rs, Sr, minimapX, minimapY, minimapX + 190, minimapY + 210, ./images/Lure7f.png
 if ErrorLevel = 0
 	goto, Lure7c
 }
@@ -873,28 +873,28 @@ Begin:
 Send ^{9}
 CoolD6:
 Send {F6}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD6.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD6.png
 if ErrorLevel = 0
 	goto, CoolD6
 Send ^{8}
 CoolD7: 
 Send {F7}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD7.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD7.png
 if ErrorLevel = 0
 	goto, CoolD7
 CoolD5:
 Send {F5}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD5.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD5.png
 if ErrorLevel = 0
 	goto, CoolD5
 CoolD9:
 Send {F9}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD9.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD9.png
 if ErrorLevel = 0
 	goto, CoolD9
 CoolD8:
 Send {F8}
-ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD8.png
+ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD8.png
 if ErrorLevel = 0
 	goto, CoolD8
 	
@@ -906,7 +906,7 @@ MeganiumFound1 := 1
 MeganiumFound2 := 0
 
 CoordMode, Pixel, Relative
-ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
+ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
 If ErrorLevel = 1
 	MeganiumFound1 = 0
 	
@@ -923,7 +923,7 @@ if (MeganiumFound1 = 0) {
 		
 		MouseMove, %RevX%, %RevY%
 		Send {XButton2}
-		ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF max.png
+		ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF ./images/max.png
 		if ErrorLevel = 1 
 			goto,  Rev3
 
@@ -933,7 +933,7 @@ if (MeganiumFound1 = 0) {
 
 			if RevStop = 7
 				goto, Ok3
-			ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 revOut.png
+			ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 ./images/revOut.png
 			if (ErrorLevel = 1) {
 			
 				MouseMove, %RevX%, %RevY%
@@ -956,7 +956,7 @@ if (MeganiumFound1 = 0) {
 	
 		Sleep, 1000
 		
-		ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 revOut.png
+		ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 ./images/revOut.png
 		if (ErrorLevel = 1) {
 		
 			MouseMove, %RevX%, %RevY%
@@ -1003,16 +1003,16 @@ if (MeganiumFound1 = 0) {
 	}
 } else {
 	
-	MeganiumFound1 := 1
-	MeganiumFound2 := 0
+		MeganiumFound1 := 1
+		MeganiumFound2 := 0
 
-ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ancientmeganium.png
-If ErrorLevel = 0
-	MeganiumFound2 = 1
-	
-if (MeganiumFound2 = 1) {
-		Send {Numpad6}
-		goto, Begin
+	ImageSearch, Fg, Gf, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 260, *20 ./images/ancientmeganium.png
+	If ErrorLevel = 0
+		MeganiumFound2 = 1
+		
+	if (MeganiumFound2 = 1) {
+			Send {Numpad6}
+			goto, Begin
 	} else
 		goto, Loop2
 }
