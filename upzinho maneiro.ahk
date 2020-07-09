@@ -3,9 +3,11 @@
 SendMode Input 
 SetWorkingDir %A_ScriptDir% 
 
+
+
 ^!c::
 
-Tooltip, Adjusting Settings..., 100, 100
+Tooltip, Adjusting Screen..., 100, 100
 
 HuntMode := 0
 
@@ -29,9 +31,11 @@ sleep, 40
 Click, up
 MouseMove, X, Y
 
+Tooltip, Acquiring key coordinates..., 100, 100
+
 FindBattleMenu:
 
-ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/battlemenu.png
+ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/battlemenu.png
 if ErrorLevel = 1
 	goto, FindBattleMenu
 
@@ -39,11 +43,11 @@ battlemenuX -= 5
 
 FindMiniMap:
 	
-ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./images/minimap.png
+ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/minimap.png
 if ErrorLevel = 1
-	goto, FindMiniMap
-	
-Tooltip, Adjusting CD's, 100, 100	
+	goto, FindMiniMap	
+
+Tooltip, Adjusting Skills Bar..., 100, 100
 
 FindCD:
 
@@ -61,6 +65,7 @@ if (ErrorLevel = 1) {
 		MouseMove typhX + 16, typhY + 16
 		sleep, 40
 		Send {XButton2}
+
 		FindMax:
 		ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./images/max.png
 		If ErrorLevel = 1
@@ -73,6 +78,8 @@ if (ErrorLevel = 1) {
 	} else
 		goto, FindTyph
 }
+
+Tooltip
 
 sleep, 600
 
@@ -100,6 +107,8 @@ RevX := 0
 RevY := 0
 
 CoordMode, Pixel, Relative
+
+Tooltip, Configuring Revive..., 100, 100
 
 RevStart:
 
