@@ -1,11 +1,18 @@
 ﻿#NoEnv  
+#SingleInstance, force
 ; #Warn  
 SendMode Input 
 SetWorkingDir %A_ScriptDir% 
 
-
+Gui, Color, 0x272827
+Gui, Font, s8, courier
+Gui, Add, Button, x10 y10 w90 h20 gConfigure, Configure
+Gui, Show, x650 y0 w300 h200, `t
+return
 
 ^!c::
+
+configure:
 
 Tooltip, Adjusting Screen..., 100, 100
 

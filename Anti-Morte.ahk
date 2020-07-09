@@ -12,7 +12,7 @@ Tooltip, Finding BattleMenu, 100, 121
 
 FindBattleMenu:
 
-ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 battlemenu.png
+ImageSearch, battlemenuX, battlemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/battlemenu.png
 if ErrorLevel = 1
 	goto, FindBattleMenu
 
@@ -22,7 +22,7 @@ Tooltip, Finding CD's, 100, 121
 
 FindCD:
 
-ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 cdmenu.png
+ImageSearch, cdmenuX, cdmenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/cdmenu.png
 if ErrorLevel = 1
 	goto, FindCD
 	
@@ -30,7 +30,7 @@ Tooltip, Finding Pokemon's Bag, 100, 121
 
 FindWhiteBag:
 
-ImageSearch, whitebagX, whitebagY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 WhiteBag.png
+ImageSearch, whitebagX, whitebagY, 0, 0, A_ScreenWidth, A_ScreenHeight, *20 ./images/WhiteBag.png
 if ErrorLevel = 1
 	goto, FindWhiteBag
 	
@@ -46,7 +46,7 @@ Tooltip, Finding Revive Slot, 100, 121
 
 RevStart:
 
-ImageSearch, pokemenuX, pokemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, pokemonmenu.png
+ImageSearch, pokemenuX, pokemenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./images/pokemonmenu.png
 if (ErrorLevel = 0) {
 	RevX := pokemenuX
 	RevY := pokemenuY
@@ -67,13 +67,13 @@ Loop1:
 
 CoordMode, Pixel, Relative
 FindTyph:
-ImageSearch, typhX, typhY, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 typh.png
+ImageSearch, typhX, typhY, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 ./images/typh.png
 if ErrorLevel = 0
 	goto, FindCast
 else
 	goto, FindTyph
 FindCast:
-ImageSearch, castX, castY, whitebagX, whitebagY, whitebagX + 185, whitebagY + 65, *10 cast.png
+ImageSearch, castX, castY, whitebagX, whitebagY, whitebagX + 185, whitebagY + 65, *10 ./images/cast.png
 if (ErrorLevel = 0) {
 	MouseMove, castX + 15, castY + 15
 	sleep, 40
@@ -90,7 +90,7 @@ if (ErrorLevel = 0) {
 	
 ChangePoke:
 
-ImageSearch, castX, castY, whitebagX, whitebagY, whitebagX + 185, whitebagY + 65, *10 cast.png
+ImageSearch, castX, castY, whitebagX, whitebagY, whitebagX + 185, whitebagY + 65, *10 ./images/cast.png
 if ErrorLevel = 1 
 	goto, ChangePoke
 		
@@ -101,10 +101,10 @@ castY += 15
 	
 Tooltip, Anti-Dead Ready. Waiting., 100, 121
 start:
-ImageSearch, Rs, Sr, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 150, revOut.png
+ImageSearch, Rs, Sr, battlemenuX, battlemenuY, battlemenuX + 180, battlemenuY + 150, ./images/revOut.png
 if (ErrorLevel = 1) {
 	start1:
-	ImageSearch, Rs, Sr, 1380, 280, 1599, 489, zeroLife.png
+	ImageSearch, Rs, Sr, 1380, 280, 1599, 489, ./images/zeroLife.png
 	if (ErrorLevel = 0) {
 		Send ^{End}
 		MouseMove, castX, castY
@@ -144,7 +144,7 @@ sleep, 2400
 
 	MouseMove, %RevX%, %RevY%
 	Send {XButton2}
-	ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF max.png
+	ImageSearch, Rs, Sr, maxX - 16, maxY - 3, maxX + 40, maxY + 11, *Trans0x0000FF ./images/max.png
 	if ErrorLevel = 1 
 		goto,  Rev2
 
@@ -154,7 +154,7 @@ sleep, 2400
 
 		if RevStop = 7
 			goto, Ok2
-		ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 revOut.png
+		ImageSearch, Rs, Sr, battlemenuX + 17, battlemenuY + 24, battlemenuX + 100, battlemenuY + 50, *15 ./images/revOut.png
 		if (ErrorLevel = 1) {
 		
 			MouseMove, %RevX%, %RevY%
@@ -176,33 +176,33 @@ sleep, 2400
 	MouseMove, %X%, %Y%
 	Offensive:
 	Send ^{9}
-	ImageSearch, Rs, Sr, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 Offensive.png
+	ImageSearch, Rs, Sr, pokemenuX, pokemenuY, pokemenuX + 190, pokemenuY + 100, *10 ./images/Offensive.png
 	if ErrorLevel = 1
 		goto, Offensive
 	CD6:
 	Send {F6}
-	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD6.png
+	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD6.png
 	if ErrorLevel = 0
 		goto, CD6
 	Send ^{8}
 	CD7: 
 	Send {F7}
-	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD7.png
+	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD7.png
 	if ErrorLevel = 0
 		goto, CD7
 	CD5:
 	Send {F5}
-	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD5.png
+	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD5.png
 	if ErrorLevel = 0
 		goto, CD5
 	CD9:
 	Send {F9}
-	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD9.png
+	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD9.png
 	if ErrorLevel = 0
 		goto, CD9
 	CD8:
 	Send {F8}
-	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 CD8.png
+	ImageSearch, Rs, Sr, cdmenuX, cdmenuY, cdmenuX + 52, cdmenuY + 340, *10 ./images/CD8.png
 	if ErrorLevel = 0
 		goto, CD8
 	
@@ -215,7 +215,7 @@ reset:
 
 offbattle := 0
 
-ImageSearch, Fg, Gf, typhX - 100, typhY - 100, typhX + 50, typhY + 100, offbattle2.png
+ImageSearch, Fg, Gf, typhX - 100, typhY - 100, typhX + 50, typhY + 100, ./images/offbattle2.png
 if ErrorLevel = 0
 	offbattle++
 if (offbattle >= 1) {
