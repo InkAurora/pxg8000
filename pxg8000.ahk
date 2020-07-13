@@ -4,12 +4,17 @@
 SendMode Input 
 SetWorkingDir %A_ScriptDir% 
 CoordMode, Pixel, Screen
+CoordMode, ToolTip, Screen
+CoordMode, Mouse, Screen
 
+Gui, +AlwaysOnTop
 Gui, Color, 0x272827
 Gui, Font, s8, sans-serif
-Gui, Add, Button, x110 y10 w90 h20 gfirstTimeConfigure, New Here?
-Gui, Add, Button, x10 y10 w90 h20 gConfigure, Configure
-Gui, Show, x650 y0 w300 h200, `t
+Gui, Add, Button, x10 y247 w50 h20 gReload, Reload
+Gui, Add, Button, x10 y10 w70 h20 gConfigure, Configure
+Gui, Add, Button, x90 y10 w70 h20 gFirstTimeConfigure, New Here?
+Gui, Add, StatusBar,, Idle
+Gui, Show, x0 y550 w170 h300, `t
 return
 
 ; Labels
@@ -20,15 +25,29 @@ GuiClose:
     ExitApp
     return
 
-firstTimeConfigure:
+FirstTimeConfigure:
+
+; Gui, Show, Hide
 
 
 
 Configure:
 
+    SB_SetText("Finding Screen Border")
+
+    FindScreenBorder:
+
+    ImageSearch, borderX, borderY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder.png
+    if ErrorLevel = 1
+        goto, FindScreenBorder
+
+    borderY += 12
+
+    SB_SetText("Adjusting Screen Scale")
+
     AdjustScreenScale:
 
-    ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./imagesNew/padrao.png
+    ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, *5 *Trans0x0000FF ./imagesNew/padrao.png
     if (ErrorLevel = 1) {
         ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, ./imagesNew/padraoLit.png
         if ErrorLevel = 1
@@ -37,17 +56,18 @@ Configure:
         
     Sleep, 1000
 
-    padraoY -= 3
+    padraoY -= 4    
     MouseGetPos, X, Y
-    MouseMove, padraoX, padraoY
+    MouseMove, padraoX, padraoY  
     sleep, 100
     Click, down
-    sleep, 40
-    MouseMove, 420, 735
-    sleep, 40
+    sleep, 100
+    MouseMove, padraoX, borderY + 700
+    sleep, 100
     Click, up
     MouseMove, X, Y
 
+    ; Gui, Show
     return
 
 ; Hotkeys
@@ -55,7 +75,8 @@ Configure:
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
 ^Esc::
-    sleep, 1500
+    Reload:
+    sleep, 700
     Reload
 
     return
