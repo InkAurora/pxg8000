@@ -107,6 +107,15 @@ Configure:
     if ErrorLevel = 1
         goto, FindPokeMenu
 
+    ToolTip
+    
+    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, ./imagesNew/pokeMenu2.png
+    if (ErrorLevel = 0) {
+        Tooltip, Equip a Pokemon to proceed, pokeMenuX, pokeMenuY - 30
+        sleep, 2000
+        goto, FindPokeMenu
+    }
+
     SB_SetText("Idle")
 
     ; Gui, Show
