@@ -84,21 +84,24 @@ Configure:
         goto, AdjustMinimap
  
     b += 47
-    BlockInput, MouseMove   
-    MouseGetPos, X, Y
+    BlockInput, MouseMove
     MouseMove, a + 33, b - 35
-    sleep, 40
-    MouseClick,,,, 10
+    sleep, 100
+    MouseClick,,,, 2
+    MouseClick,,,, 2
+    MouseClick,,,, 2
+    MouseClick,,,, 2
+    MouseClick,,,, 2
     MouseMove, a + 33, b - 15
-    sleep, 40
+    sleep, 100
     MouseClick,,,, 3
-    sleep, 40
+    sleep, 100
     MouseMove, a, b  
-    sleep, 40
+    sleep, 100
     Click, down
-    sleep, 40
+    sleep, 100
     MouseMove, a, minimapY + 230
-    sleep, 40
+    sleep, 100
     Click, up
     MouseMove, X, Y
     BlockInput, MouseMoveOff
@@ -130,23 +133,53 @@ Configure:
 
     ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu2.png
     if (ErrorLevel = 0) {
-        ; BlockInput, MouseMove
+        BlockInput, MouseMove
         MouseMove, battleMenuX + 75, battleMenuY + 10
         sleep, 40
         Click
         MouseMove, X, Y
         sleep, 100
+        BlockInput, MouseMoveOff
     }
 
     ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu3.png
     if (ErrorLevel = 0) {
-        ; BlockInput, MouseMove
+        BlockInput, MouseMove
         MouseMove, battleMenuX + 95, battleMenuY + 10
         sleep, 40
         Click
         MouseMove, X, Y
         sleep, 100
+        BlockInput, MouseMoveOff
     }
+
+    SB_SetText("Adjusting Skill Menu")
+
+    FindSkillMenu:
+
+    sleep, 1000
+
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/skillMenu.png
+    if (ErrorLevel = 1) {
+        BlockInput, MouseMove
+        MouseMove, pokeMenuX + 20, pokeMenuY + 70
+        sleep, 40
+        MouseClick, Right
+        BlockInput, MouseMoveOff
+        goto, FindSkillMenu
+    }
+
+    BlockInput, MouseMove
+    MouseMove, skillX + 2, skillY + 2
+    sleep, 40
+    Click, down
+    MouseMove, borderX + 975, borderY + 50
+    sleep, 40
+    Click, up
+    sleep, 40
+    MouseMove, X, Y
+    sleep, 40
+    BlockInput, MouseMoveOff
 
     
 
