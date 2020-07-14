@@ -56,7 +56,8 @@ Configure:
         
     Sleep, 1000
 
-    padraoY -= 4    
+    padraoY -= 4 
+    BlockInput, MouseMove   
     MouseGetPos, X, Y
     MouseMove, padraoX, padraoY  
     sleep, 100
@@ -66,6 +67,47 @@ Configure:
     sleep, 100
     Click, up
     MouseMove, X, Y
+    BlockInput, MouseMoveOff
+
+    SB_SetText("Adjusting Minimap")
+
+    AdjustMinimap:
+
+    ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/minimap.png
+    if ErrorLevel = 1
+        goto, AdjustMinimap
+
+    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/minimap2.png
+    if ErrorLevel = 1
+        goto, AdjustMinimap
+ 
+    b += 47
+    BlockInput, MouseMove   
+    MouseGetPos, X, Y
+    MouseMove, a, b  
+    sleep, 40
+    Click, down
+    sleep, 40
+    MouseMove, a, minimapY + 230
+    sleep, 40
+    Click, up
+    sleep, 40
+    MouseMove, a + 33, b - 35
+    sleep, 40
+    MouseClick,,,, 10
+    MouseMove, a + 33, b - 15
+    sleep, 40
+    MouseClick,,,, 3
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff  
+
+    FindPokeMenu:
+
+    ImageSearch, pokeMenuX, pokeMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/pokeMenu.png
+    if ErrorLevel = 1
+        goto, FindPokeMenu
+
+    SB_SetText("Idle")
 
     ; Gui, Show
     return
