@@ -57,7 +57,9 @@ Configure:
     Sleep, 1000
 
     padraoY -= 4 
-    BlockInput, MouseMove   
+    BlockInput, MouseMove 
+    MouseMove padraoX, padraoY - 50
+    sleep, 40  
     MouseGetPos, X, Y
     MouseMove, padraoX, padraoY  
     sleep, 100
@@ -84,6 +86,13 @@ Configure:
     b += 47
     BlockInput, MouseMove   
     MouseGetPos, X, Y
+    MouseMove, a + 33, b - 35
+    sleep, 40
+    MouseClick,,,, 10
+    MouseMove, a + 33, b - 15
+    sleep, 40
+    MouseClick,,,, 3
+    sleep, 40
     MouseMove, a, b  
     sleep, 40
     Click, down
@@ -91,15 +100,10 @@ Configure:
     MouseMove, a, minimapY + 230
     sleep, 40
     Click, up
-    sleep, 40
-    MouseMove, a + 33, b - 35
-    sleep, 40
-    MouseClick,,,, 10
-    MouseMove, a + 33, b - 15
-    sleep, 40
-    MouseClick,,,, 3
     MouseMove, X, Y
-    BlockInput, MouseMoveOff  
+    BlockInput, MouseMoveOff
+
+    SB_SetText("Finding Pokemon Menu")
 
     FindPokeMenu:
 
@@ -115,6 +119,36 @@ Configure:
         sleep, 2000
         goto, FindPokeMenu
     }
+
+    SB_SetText("Finding Battle Menu")
+
+    FindBattleMenu:
+
+    ImageSearch, battleMenuX, battleMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/battleMenu.png
+    if ErrorLevel = 1
+        goto, FindBattleMenu
+
+    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu2.png
+    if (ErrorLevel = 0) {
+        ; BlockInput, MouseMove
+        MouseMove, battleMenuX + 75, battleMenuY + 10
+        sleep, 40
+        Click
+        MouseMove, X, Y
+        sleep, 100
+    }
+
+    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu3.png
+    if (ErrorLevel = 0) {
+        ; BlockInput, MouseMove
+        MouseMove, battleMenuX + 95, battleMenuY + 10
+        sleep, 40
+        Click
+        MouseMove, X, Y
+        sleep, 100
+    }
+
+    
 
     SB_SetText("Idle")
 
