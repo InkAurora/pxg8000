@@ -19,6 +19,14 @@ Gui, Add, StatusBar,, Idle
 Gui, Show, x0 y550 w170 h300, `t
 return
 
+; Functions
+; -------------------------------------------------------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------------------------------------------
+
+calcScreenSize() {
+
+}
+
 ; Labels
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +45,7 @@ Configure:
 
     FindScreenBorder:
 
-    ImageSearch, borderX, borderY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder.png
+    ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
     if ErrorLevel = 1
         goto, FindScreenBorder
 
@@ -69,7 +77,16 @@ Configure:
     sleep, 40
     Click, up
     MouseMove, X, Y
-    ImageSearch, borderX, borderY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder.png
+    ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
+    if ErrorLevel = 1
+        goto, FindScreenBorder
+    ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder2.png
+    if ErrorLevel = 1
+        goto, FindScreenBorder
+    ImageSearch, border3X, border3Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder3.png
+    if ErrorLevel = 1
+        goto, FindScreenBorder
+    ImageSearch, border4X, border4Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder4.png
     if ErrorLevel = 1
         goto, FindScreenBorder
     BlockInput, MouseMoveOff
@@ -176,7 +193,7 @@ Configure:
     MouseMove, skillX + 2, skillY + 2
     sleep, 40
     Click, down
-    MouseMove, borderX + 974, borderY + 50
+    MouseMove, border1X + 974, border1Y + 50
     sleep, 40
     Click, up
     sleep, 40
@@ -206,8 +223,6 @@ Configure:
 
     IniWrite, %maxX%, config.ini, vars, maxX
     IniWrite, %maxY%, config.ini, vars, maxY
-
-
 
     endConfig:
         return
