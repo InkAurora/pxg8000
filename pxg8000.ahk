@@ -27,6 +27,46 @@ calcScreenSize() {
 
 }
 
+useRevive(skillX, skillY, pokeMenuX, pokeMenuY, maxX, maxY) {
+    RevX := pokeMenuX + 20
+    RevY := pokeMenuY + 75
+
+    ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
+    if (ErrorLevel = 0) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+		MouseMove, RevX, RevY
+		sleep, 20
+		Click, right
+    }
+    else if (ErrorLevel = 1) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+        MouseMove, RevX, RevY
+        sleep, 20
+    }
+
+    Rev1:
+
+    Send {XButton2}
+	ImageSearch, Rs, Sr, maxX, maxY, maxX + 23, maxY + 9, *Trans0x0000FF ./imagesNew/max.png
+	if ErrorLevel = 1
+		goto,  Rev1
+
+	Loop {
+		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
+		if (ErrorLevel = 1) {
+			Click, right
+		}
+		else
+			goto, Ok1
+	}
+
+    Ok1:
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+}
+
 ; Labels
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +89,7 @@ Configure:
     if ErrorLevel = 1
         goto, FindScreenBorder
 
-    borderY += 12
+    border1Y += 12
 
     SB_SetText("Adjusting Screen Scale")
 
@@ -73,7 +113,7 @@ Configure:
     sleep, 40
     Click, down
     sleep, 40
-    MouseMove, padraoX, borderY + 700
+    MouseMove, padraoX, border1Y + 700
     sleep, 40
     Click, up
     MouseMove, X, Y
@@ -177,28 +217,36 @@ Configure:
 
     FindSkillMenu:
 
-    sleep, 1000
+    sleep, 500
 
     ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/skillMenu.png
     if (ErrorLevel = 1) {
         BlockInput, MouseMove
-        MouseMove, pokeMenuX + 20, pokeMenuY + 70
+        MouseMove, pokeMenuX + 20, pokeMenuY + 75
         sleep, 40
         MouseClick, Right
         BlockInput, MouseMoveOff
         goto, FindSkillMenu
     }
 
+    skillX -= 18
+    skillY -= 24
     BlockInput, MouseMove
     MouseMove, skillX + 2, skillY + 2
     sleep, 40
     Click, down
-    MouseMove, border1X + 974, border1Y + 50
+    MouseMove, border1X + 975, border1Y + 51
     sleep, 40
     Click, up
     sleep, 40
     MouseMove, X, Y
     sleep, 40
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/skillMenu.png
+    if ErrorLevel = 1
+        goto, FindSkillMenu
+    skillX -= 18
+    skillY -= 24
+    ToolTip, %skillX% %skillY%, 100, 100
     BlockInput, MouseMoveOff
 
     SB_SetText("Idle")
@@ -225,7 +273,14 @@ Configure:
     IniWrite, %maxY%, config.ini, vars, maxY
 
     endConfig:
+        Gui, Add, Button, x10 y40 w70 h20 gUseRevive, Use revive
         return
+
+UseRevive:
+
+useRevive(skillX, skillY, pokeMenuX, pokeMenuY, maxX, maxY)
+
+return
 
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
