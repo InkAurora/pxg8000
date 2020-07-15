@@ -6,6 +6,8 @@ SetWorkingDir %A_ScriptDir%
 CoordMode, Pixel, Screen
 CoordMode, ToolTip, Screen
 CoordMode, Mouse, Screen
+SetDefaultMouseSpeed, 0
+firstTimeConfigure := 0
 
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
@@ -27,9 +29,7 @@ GuiClose:
 
 FirstTimeConfigure:
 
-; Gui, Show, Hide
-
-
+    firstTimeConfigure := 1
 
 Configure:
 
@@ -62,13 +62,16 @@ Configure:
     sleep, 40  
     MouseGetPos, X, Y
     MouseMove, padraoX, padraoY  
-    sleep, 100
+    sleep, 40
     Click, down
-    sleep, 100
+    sleep, 40
     MouseMove, padraoX, borderY + 700
-    sleep, 100
+    sleep, 40
     Click, up
     MouseMove, X, Y
+    ImageSearch, borderX, borderY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder.png
+    if ErrorLevel = 1
+        goto, FindScreenBorder
     BlockInput, MouseMoveOff
 
     SB_SetText("Adjusting Minimap")
@@ -173,7 +176,7 @@ Configure:
     MouseMove, skillX + 2, skillY + 2
     sleep, 40
     Click, down
-    MouseMove, borderX + 975, borderY + 50
+    MouseMove, borderX + 974, borderY + 50
     sleep, 40
     Click, up
     sleep, 40
@@ -181,12 +184,33 @@ Configure:
     sleep, 40
     BlockInput, MouseMoveOff
 
-    
-
     SB_SetText("Idle")
 
-    ; Gui, Show
-    return
+    if (firstTimeConfigure = 0) {
+        IniRead, maxX, config.ini, vars, maxX, %A_Space%
+        IniRead, maxY, config.ini, vars, maxY, %A_Space%
+        goto, endConfig
+    }
+
+    ToolTip, Use a revive to configure, pokeMenuX, pokeMenuY - 30
+
+    ConfigRevive:
+
+    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/max.png
+    if ErrorLevel = 1
+        goto, ConfigRevive
+    
+    ToolTip, Success!, pokeMenuX, pokeMenuY - 30
+    sleep, 2000
+    ToolTip
+
+    IniWrite, %maxX%, config.ini, vars, maxX
+    IniWrite, %maxY%, config.ini, vars, maxY
+
+
+
+    endConfig:
+        return
 
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
