@@ -13,15 +13,16 @@ global skillX, skillY
 global pokeMenuX, pokeMenuY
 global maxX, maxY
 global divX, divY
+global imgHandle, imgHandle1, imgHandle2
 
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
 Gui, Font, s8, sans-serif
 Gui, Add, Button, x10 y247 w50 h20 gReload, Reload
-Gui, Add, Button, x10 y10 w70 h20 gConfigure, Configure
-Gui, Add, Button, x90 y10 w70 h20 gFirstTimeConfigure, New Here?
+Gui, Add, Button, x10 y10 w80 h20 gConfigure, Configure
+Gui, Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
 Gui, Add, StatusBar,, Idle
-Gui, Show, x0 y550 w170 h300, `t
+Gui, Show, x0 y550 w190 h300, `t
 return
 
 ; Functions
@@ -30,14 +31,17 @@ return
 
 findPokemonPosition() {
 
-   ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
-   if ErrorLevel = 1
+    ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
+    if ErrorLevel = 1
+        ToolTip
 
 }
 
 useRevive() {
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
+
+    imgHandle1 := LoadPicture("imagesNew/max.png")
 
     ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
     if (ErrorLevel = 0) {
@@ -57,15 +61,16 @@ useRevive() {
     Rev1:
 
     Send {XButton2}
-	ImageSearch, Rs, Sr, maxX, maxY, maxX + 23, maxY + 9, *Trans0x0000FF ./imagesNew/max.png
+	ImageSearch, Rs, Sr, maxX - 2, maxY, maxX + 25, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
 	if ErrorLevel = 1
 		goto,  Rev1
 
+    imgHandle2 := LoadPicture("imagesNew/revOut.png")
+
 	Loop {
-		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
-		if (ErrorLevel = 1) {
+		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF HBITMAP:*%imgHandle2%
+		if ErrorLevel = 1 
 			Click, right
-		}
 		else
 			goto, Ok1
 	}
@@ -303,9 +308,9 @@ Configure:
 
 UseRevive:
 
-useRevive()
+    useRevive()
 
-return
+    return
 
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
