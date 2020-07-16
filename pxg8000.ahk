@@ -9,6 +9,11 @@ CoordMode, Mouse, Screen
 SetDefaultMouseSpeed, 0
 firstTimeConfigure := 0
 
+global skillX, skillY
+global pokeMenuX, pokeMenuY
+global maxX, maxY
+global divX, divY
+
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
 Gui, Font, s8, sans-serif
@@ -23,11 +28,14 @@ return
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
-calcScreenSize() {
+findPokemonPosition() {
+
+   ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
+   if ErrorLevel = 1
 
 }
 
-useRevive(skillX, skillY, pokeMenuX, pokeMenuY, maxX, maxY) {
+useRevive() {
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
 
@@ -88,7 +96,6 @@ Configure:
     ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-
     border1Y += 12
 
     SB_SetText("Adjusting Screen Scale")
@@ -106,13 +113,15 @@ Configure:
 
     padraoY -= 4 
     BlockInput, MouseMove 
-    MouseMove padraoX, padraoY - 50
+    MouseMove padraoX, border1Y + 100
     sleep, 40  
     MouseGetPos, X, Y
     MouseMove, padraoX, padraoY  
     sleep, 40
     Click, down
     sleep, 40
+    MouseMove, border1X + 100, border1Y + 100
+    sleep, 25
     MouseMove, padraoX, border1Y + 700
     sleep, 40
     Click, up
@@ -120,15 +129,23 @@ Configure:
     ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
     if ErrorLevel = 1
         goto, FindScreenBorder
+    border1X += 18
+    border1Y += 9
     ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder2.png
     if ErrorLevel = 1
         goto, FindScreenBorder
+    border2X += 21
+    border2Y += 6
     ImageSearch, border3X, border3Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder3.png
     if ErrorLevel = 1
         goto, FindScreenBorder
+    border3X += 25
+    border3Y += 4
     ImageSearch, border4X, border4Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder4.png
     if ErrorLevel = 1
         goto, FindScreenBorder
+    border4X += 26
+    border4Y += 7
     BlockInput, MouseMoveOff
 
     SB_SetText("Adjusting Minimap")
@@ -160,6 +177,8 @@ Configure:
     sleep, 100
     Click, down
     sleep, 100
+    MouseMove, border1X + 100, border1Y + 100
+    sleep, 25
     MouseMove, a, minimapY + 230
     sleep, 100
     Click, up
@@ -235,7 +254,9 @@ Configure:
     MouseMove, skillX + 2, skillY + 2
     sleep, 40
     Click, down
-    MouseMove, border1X + 975, border1Y + 51
+    MouseMove, border1X + 100, border1Y + 100
+    sleep, 25
+    MouseMove, border1X + 957, border1Y + 42
     sleep, 40
     Click, up
     sleep, 40
@@ -246,7 +267,6 @@ Configure:
         goto, FindSkillMenu
     skillX -= 18
     skillY -= 24
-    ToolTip, %skillX% %skillY%, 100, 100
     BlockInput, MouseMoveOff
 
     SB_SetText("Idle")
@@ -273,12 +293,17 @@ Configure:
     IniWrite, %maxY%, config.ini, vars, maxY
 
     endConfig:
+        divX := Round((border2X - border1X) / 15)
+        divY := Round((border3Y - border1Y) / 11)
+        ;ToolTip, %divX% %divY%
         Gui, Add, Button, x10 y40 w70 h20 gUseRevive, Use revive
         return
 
+; -------------------------------------------------------------------------------------------------------------------------------------
+
 UseRevive:
 
-useRevive(skillX, skillY, pokeMenuX, pokeMenuY, maxX, maxY)
+useRevive()
 
 return
 
