@@ -9,6 +9,11 @@ CoordMode, Mouse, Screen
 SetDefaultMouseSpeed, 0
 firstTimeConfigure := 0
 
+global BASE_ADDRESS := 0x007C6320
+SetFormat, Integer, hex
+BASE_ADDRESS := ReadMemory(BASE_ADDRESS)
+SetFormat, Integer, d
+
 global skillX, skillY
 global pokeMenuX, pokeMenuY
 global maxX, maxY
@@ -22,7 +27,7 @@ Gui, Add, Button, x10 y247 w50 h20 gReload, Reload
 Gui, Add, Button, x10 y10 w80 h20 gConfigure, Configure
 Gui, Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
 Gui, Add, StatusBar,, Idle
-Gui, Show, x0 y550 w190 h300, `t
+Gui, Show, x1 y550 w190 h300, `t
 return
 
 ; Functions
@@ -36,6 +41,47 @@ findPokemonPosition() {
         ToolTip
 
 }
+
+/*
+ReadMemory(MADDRESS=0,PROGRAM="PXG Client",BYTES=4)
+{
+   Static OLDPROC, ProcessHandle
+   VarSetCapacity(MVALUE, BYTES,0)
+   If PROGRAM != %OLDPROC%
+   {
+      WinGet, pid, pid, % OLDPROC := PROGRAM
+      ProcessHandle := (ProcessHandle ? 0*(closed:=DllCall("CloseHandle", "UInt", ProcessHandle)) : 0 ) + (pid ? DllCall("OpenProcess", "Int", 16, "Int", 0, "UInt", pid) : 0)
+   }
+   If (ProcessHandle) && DllCall("ReadProcessMemory","UInt",ProcessHandle,"UInt",MADDRESS,"Str",MVALUE,"UInt",BYTES,"UInt *",0)
+   {    Loop % BYTES
+            Result += *(&MVALUE + A_Index-1) << 8*(A_Index-1)
+        Return Result
+    }
+   return !ProcessHandle ? "Handle Closed:" closed : "Fail"
+}
+*/
+
+ReadMemory(address, type := "UInt")
+{
+    static aTypeSize := {    "UChar":    1,  "Char":     1
+                        ,   "UShort":   2,  "Short":    2
+                        ,   "UInt":     4,  "Int":      4
+                        ,   "UFloat":   4,  "Float":    4 ; UFloat is really just float (doesn't exist)
+                        ,   "Int64":    8,  "Double":   8}  
+
+    if !aTypeSize.hasKey(type)
+        return "", ErrorLevel := -2     
+
+    WinGet, pid, PID, ahk_exe pxgclient.exe
+    if !pid 
+        return 
+    if !hProcess := DllCall("OpenProcess", "UInt", 24, "Int", False, "UInt", pid, "Ptr") 
+        return 
+    success := DllCall("ReadProcessMemory", "Ptr", hProcess, "Ptr", address, type "*", result, "Ptr", aTypeSize[type], "Ptr",0)
+    DllCall("CloseHandle", "Ptr", hProcess)
+    return success ? result : ""
+}
+
 
 useRevive() {
     RevX := pokeMenuX + 20
@@ -282,7 +328,8 @@ Configure:
         goto, endConfig
     }
 
-    ToolTip, Use a revive to configure, pokeMenuX, pokeMenuY - 30
+    ;ToolTip, Use a revive to configure, pokeMenuX, pokeMenuY - 30
+    MsgBox Use a revive to configure
 
     ConfigRevive:
 
@@ -301,7 +348,8 @@ Configure:
         divX := Round((border2X - border1X) / 15)
         divY := Round((border3Y - border1Y) / 11)
         ;ToolTip, %divX% %divY%
-        Gui, Add, Button, x10 y40 w70 h20 gUseRevive, Use revive
+        Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
+        Gui, Add, Button, x10 y100 w80 h20 gTest, Test
         return
 
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -309,6 +357,19 @@ Configure:
 UseRevive:
 
     useRevive()
+
+    return
+
+Test:
+
+    Loop {
+    cX := ReadMemory(BASE_ADDRESS + 0xC)
+    cY := ReadMemory(BASE_ADDRESS + 0x10)
+
+    ToolTip, %cX%, 750, 350, 1
+    ToolTip, %cY%, 750, 370, 2
+    sleep, 200 
+    }
 
     return
 
