@@ -34,6 +34,14 @@ return
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
+calcSQM_X(posX) {
+
+    arr := []
+
+    
+
+}
+
 findPokemonPosition() {
 
     ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
@@ -42,44 +50,30 @@ findPokemonPosition() {
 
 }
 
-/*
-ReadMemory(MADDRESS=0,PROGRAM="PXG Client",BYTES=4)
-{
-   Static OLDPROC, ProcessHandle
-   VarSetCapacity(MVALUE, BYTES,0)
-   If PROGRAM != %OLDPROC%
-   {
-      WinGet, pid, pid, % OLDPROC := PROGRAM
-      ProcessHandle := (ProcessHandle ? 0*(closed:=DllCall("CloseHandle", "UInt", ProcessHandle)) : 0 ) + (pid ? DllCall("OpenProcess", "Int", 16, "Int", 0, "UInt", pid) : 0)
-   }
-   If (ProcessHandle) && DllCall("ReadProcessMemory","UInt",ProcessHandle,"UInt",MADDRESS,"Str",MVALUE,"UInt",BYTES,"UInt *",0)
-   {    Loop % BYTES
-            Result += *(&MVALUE + A_Index-1) << 8*(A_Index-1)
-        Return Result
-    }
-   return !ProcessHandle ? "Handle Closed:" closed : "Fail"
-}
-*/
+ReadMemory(address, type := "UInt") {
 
-ReadMemory(address, type := "UInt")
-{
     static aTypeSize := {    "UChar":    1,  "Char":     1
                         ,   "UShort":   2,  "Short":    2
                         ,   "UInt":     4,  "Int":      4
-                        ,   "UFloat":   4,  "Float":    4 ; UFloat is really just float (doesn't exist)
+                        ,   "UFloat":   4,  "Float":    4 
                         ,   "Int64":    8,  "Double":   8}  
 
     if !aTypeSize.hasKey(type)
         return "", ErrorLevel := -2     
 
     WinGet, pid, PID, ahk_exe pxgclient.exe
+
     if !pid 
-        return 
+        return
+
     if !hProcess := DllCall("OpenProcess", "UInt", 24, "Int", False, "UInt", pid, "Ptr") 
         return 
-    success := DllCall("ReadProcessMemory", "Ptr", hProcess, "Ptr", address, type "*", result, "Ptr", aTypeSize[type], "Ptr",0)
+
+    success := DllCall("ReadProcessMemory", "Ptr", hProcess, "Ptr", address, type "*", result, "Ptr", aTypeSize[type], "Ptr", 0)
     DllCall("CloseHandle", "Ptr", hProcess)
+    
     return success ? result : ""
+
 }
 
 
@@ -349,6 +343,7 @@ Configure:
         divY := Round((border3Y - border1Y) / 11)
         ;ToolTip, %divX% %divY%
         Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
+        Gui, Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
         Gui, Add, Button, x10 y100 w80 h20 gTest, Test
         return
 
@@ -370,6 +365,45 @@ Test:
     ToolTip, %cY%, 750, 370, 2
     sleep, 200 
     }
+
+    return
+
+CfgFish:
+
+    ToolTip, Move the mouse to desired fishing location and press Space, border1X, border1Y
+
+    OkFish:
+
+    sleep, 100
+    GetKeyState, gks, Space
+    if (gks = "U") {
+        goto, OkFish
+    }
+
+    MouseGetPos, fX, fY
+
+    ToolTip, Now equip the pokemon you'd like to use and press Space, border1X, border1Y
+
+    sleep, 500
+
+    OkFish1:
+
+    sleep, 100
+    GetKeyState, gks, Space
+    if (gks = "U") {
+        goto, OkFish1
+    }
+
+    sleep, 500
+
+    Gui, Add, Button, x100 y70 w80 h20 gFish, Auto Fish
+    ToolTip
+
+    return
+
+Fish:
+
+
 
     return
 
