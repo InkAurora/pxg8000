@@ -19,6 +19,7 @@ global pokeMenuX, pokeMenuY
 global maxX, maxY
 global divX, divY
 global imgHandle, imgHandle1, imgHandle2
+global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
 
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
@@ -36,9 +37,57 @@ return
 
 calcSQM_X(posX) {
 
-    arr := []
+    posX := posX - border1X
 
-    
+    i := 1
+    While (i < 16) {
+        sqmL := (i - 1) * divX
+        sqmH := i * divX
+        
+        if (posX > sqmL) AND (posX < sqmH) {
+            return i
+        }
+
+        i++
+    }
+
+}
+
+calcSQM_Y(posY) {
+
+    posY := posY - border1Y
+
+    i := 1
+    While (i < 12) {
+        sqmL := (i - 1) * divY
+        sqmH := i * divY
+        
+        if (posY > sqmL) AND (posY < sqmH) {
+            return i
+        }
+
+        i++
+    }
+
+}
+
+calcCoord_X(X) {
+
+    posX := ReadMemory(BASE_ADDRESS + 0xC)
+    posX -= 8
+    posX := posX + calcSQM_X(X)
+
+    return posX
+
+}
+
+calcCoord_Y(Y) {
+
+    posY := ReadMemory(BASE_ADDRESS + 0x10)
+    posY -= 6
+    posY := posY + calcSQM_Y(Y)
+
+    return posY
 
 }
 
@@ -339,8 +388,8 @@ Configure:
     IniWrite, %maxY%, config.ini, vars, maxY
 
     endConfig:
-        divX := Round((border2X - border1X) / 15)
-        divY := Round((border3Y - border1Y) / 11)
+        divX := (border2X - border1X) / 15
+        divY := (border3Y - border1Y) / 11
         ;ToolTip, %divX% %divY%
         Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
         Gui, Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
@@ -358,13 +407,15 @@ UseRevive:
 Test:
 
     Loop {
-    cX := ReadMemory(BASE_ADDRESS + 0xC)
-    cY := ReadMemory(BASE_ADDRESS + 0x10)
+        MouseGetPos, X, Y
+        posX := calcCoord_X(X)
+        posY := calcCoord_Y(Y)
 
-    ToolTip, %cX%, 750, 350, 1
-    ToolTip, %cY%, 750, 370, 2
-    sleep, 200 
+        ToolTip, %posX% %posY%
+        ; sleep, 100
     }
+
+    ToolTip, %posX%
 
     return
 
