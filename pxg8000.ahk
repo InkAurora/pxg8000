@@ -1,12 +1,12 @@
 #NoEnv  
 #SingleInstance, force
 ; #Warn  
-SendMode Input 
+; SendMode Input 
 SetWorkingDir %A_ScriptDir% 
 CoordMode, Pixel, Screen
 CoordMode, ToolTip, Screen
 CoordMode, Mouse, Screen
-SetDefaultMouseSpeed, 0
+SetMouseDelay, 15
 firstTimeConfigure := 0
 
 global BASE_ADDRESS := 0x007C6320
@@ -17,9 +17,11 @@ SetFormat, Integer, d
 global skillX, skillY
 global pokeMenuX, pokeMenuY
 global maxX, maxY
-global divX, divY
+global divX, divY, playerX, playerY
 global imgHandle, imgHandle1, imgHandle2
 global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
+global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
+global stopFish
 
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
@@ -45,6 +47,12 @@ calcSQM_X(posX) {
         sqmH := i * divX
         
         if (posX > sqmL) AND (posX < sqmH) {
+            SQM[0] := i
+            sqmL := Round(sqmL + border1X)
+            sqmH := Round(sqmH + border1X)
+            SQM[2] := sqmL + (divX / 2)
+            SQM[4] := sqmL
+            SQM[6] := sqmH
             return i
         }
 
@@ -63,6 +71,12 @@ calcSQM_Y(posY) {
         sqmH := i * divY
         
         if (posY > sqmL) AND (posY < sqmH) {
+            SQM[1] := i
+            sqmL := Round(sqmL + border1Y)
+            sqmH := Round(sqmH + border1Y)
+            SQM[3] := sqmL + (divY / 2)
+            SQM[5] := sqmL
+            SQM[7] := sqmH
             return i
         }
 
@@ -91,11 +105,90 @@ calcCoord_Y(Y) {
 
 }
 
+collectLoot(pX, pY, delay = 50) {
+
+    BlockInput, MouseMove
+
+    LOOT := []
+
+    calcSQM_X(pX - divX)
+    LOOT[0] := SQM[2]
+    calcSQM_Y(pY - divY)
+    LOOT[1] := SQM[3]
+    calcSQM_X(pX)
+    LOOT[2] := SQM[2]
+    calcSQM_Y(pY - divY)
+    LOOT[3] := SQM[3]
+    calcSQM_X(pX + divX)
+    LOOT[4] := SQM[2]
+    calcSQM_Y(pY - divY)
+    LOOT[5] := SQM[3]
+    calcSQM_X(pX + divX)
+    LOOT[6] := SQM[2]
+    calcSQM_Y(pY)
+    LOOT[7] := SQM[3]
+    calcSQM_X(pX + divX)
+    LOOT[8] := SQM[2]
+    calcSQM_Y(pY + divY)
+    LOOT[9] := SQM[3]
+    calcSQM_X(pX)
+    LOOT[10] := SQM[2]
+    calcSQM_Y(pY + divY)
+    LOOT[11] := SQM[3]
+    calcSQM_X(pX - divX)
+    LOOT[12] := SQM[2]
+    calcSQM_Y(pY + divY)
+    LOOT[13] := SQM[3]
+    calcSQM_X(pX - divX)
+    LOOT[14] := SQM[2]
+    calcSQM_Y(pY)
+    LOOT[15] := SQM[3]
+
+    MouseMove, LOOT[0], LOOT[1], 2
+	Sleep, delay
+	Click, right, LOOT[0], LOOT[1]
+
+    MouseMove, LOOT[2], LOOT[3], 2
+	Sleep, delay
+	Click, right, LOOT[2], LOOT[3]
+
+    MouseMove, LOOT[4], LOOT[5], 2
+	Sleep, delay
+	Click, right, LOOT[4], LOOT[5]
+
+    MouseMove, LOOT[6], LOOT[7], 2
+	Sleep, delay
+	Click, right, LOOT[6], LOOT[7]
+
+    MouseMove, LOOT[8], LOOT[9], 2
+	Sleep, delay
+	Click, right, LOOT[8], LOOT[9]
+
+    MouseMove, LOOT[10], LOOT[11], 2
+	Sleep, delay
+	Click, right, LOOT[10], LOOT[11]
+
+    MouseMove, LOOT[12], LOOT[13], 2
+	Sleep, delay
+	Click, right, LOOT[12], LOOT[13]
+
+    MouseMove, LOOT[14], LOOT[15], 2
+	Sleep, delay
+	Click, right, LOOT[14], LOOT[15]
+
+    BlockInput, MouseMoveOff
+
+    return
+
+}
+
 findPokemonPosition() {
 
     ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
-    if ErrorLevel = 1
+    if ErrorLevel = 0
         ToolTip
+
+    
 
 }
 
@@ -390,6 +483,8 @@ Configure:
     endConfig:
         divX := (border2X - border1X) / 15
         divY := (border3Y - border1Y) / 11
+        playerX := ((border2X - border1X) / 2) + border1X 
+        playerY := ((border3Y - border1Y) / 2) + border1Y 
         ;ToolTip, %divX% %divY%
         Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
         Gui, Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
@@ -405,6 +500,8 @@ UseRevive:
     return
 
 Test:
+
+    collectLoot(playerX, playerY)
 
     Loop {
         MouseGetPos, X, Y
@@ -454,13 +551,75 @@ CfgFish:
 
 Fish:
 
+    stopFish := 0
 
+    calcSQM_X(fX)
+    calcSQM_Y(fY)
+    fX := SQM[2]
+    fY := SQM[3]
+    a := SQM[4]
+    b := SQM[5]
+    c := SQM[6]
+    d := SQM[7]
+
+    imgHandle1 := LoadPicture("imagesNew/fishReady.png")
+
+    ToolTip, To stop fishing press Ctrl+Space, border1X, border1Y - 20
+
+    sleep, 400
+    Click, %playerX%, %playerY%
+
+    StartFish:
+
+    if stopFish = 1
+        return
+
+    sleep, 2000
+
+    Send ^{z}
+    sleep, 50
+    BlockInput, MouseMove
+    MouseMove, fX, fY
+    sleep, 50
+    Click
+    BlockInput, MouseMoveOff
+
+    FishLoop:
+        ImageSearch, sR, Rs, a, b, c, d, *100 *Trans0x0000FF HBITMAP:*%imgHandle1%
+        if ErrorLevel = 0
+            goto, DoneFish
+        else
+            goto, FishLoop
+
+    DoneFish:
+
+    collectLoot(playerX, playerY, 150)
+
+    sleep, 500
+
+    Send ^{z}
+    
+    goto, StartFish
 
     return
 
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
+
+Numpad5::
+
+    collectLoot(playerX, playerY)
+
+    return
+
+^Space::
+
+    ToolTip
+
+    stopFish := 1
+
+    return
 
 ^Esc::
     Reload:
