@@ -14,6 +14,20 @@ SetFormat, Integer, hex
 BASE_ADDRESS := ReadMemory(BASE_ADDRESS)
 SetFormat, Integer, d
 
+global BATTLE_BASE_ADDRESS := 0x007C5CC0
+global BATTLE_OFFSETS := [0x9C, 0x54, 0x8, 0x68, 0x4, 0x54, 0x1C, 0x9C, 0x30]
+SetFormat, Integer, hex
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x4)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x1C)
+BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
+SetFormat, Integer, d
+
 global skillX, skillY
 global pokeMenuX, pokeMenuY
 global maxX, maxY
@@ -501,18 +515,28 @@ UseRevive:
 
 Test:
 
-    collectLoot(playerX, playerY)
+    ; collectLoot(playerX, playerY)
+
+    ; Loop {
+    ;     MouseGetPos, X, Y
+    ;     posX := calcCoord_X(X)
+    ;     posY := calcCoord_Y(Y)
+
+    ;     ToolTip, %posX% %posY%
+    ;     ; sleep, 100
+    ; }
+
+    ; ToolTip, %posX%
 
     Loop {
-        MouseGetPos, X, Y
-        posX := calcCoord_X(X)
-        posY := calcCoord_Y(Y)
+    Rs := ReadMemory(BATTLE_BASE_ADDRESS + 0x30)
 
-        ToolTip, %posX% %posY%
-        ; sleep, 100
+    Rs -= 308
+    Rs := Round(Rs / 25)
+
+    ToolTip, Elementos no Battle: %Rs%, battleMenuX, battleMenuY
+    sleep, 200
     }
-
-    ToolTip, %posX%
 
     return
 
@@ -607,11 +631,11 @@ Fish:
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
-Numpad5::
+; Numpad5::
 
-    collectLoot(playerX, playerY)
+;     collectLoot(playerX, playerY)
 
-    return
+;     return
 
 ^Space::
 
