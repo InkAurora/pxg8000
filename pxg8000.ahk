@@ -15,7 +15,6 @@ BASE_ADDRESS := ReadMemory(BASE_ADDRESS)
 SetFormat, Integer, d
 
 global BATTLE_BASE_ADDRESS := 0x007C5CC0
-global BATTLE_OFFSETS := [0x9C, 0x54, 0x8, 0x68, 0x4, 0x54, 0x1C, 0x9C, 0x30]
 SetFormat, Integer, hex
 BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
 BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
@@ -35,12 +34,12 @@ global divX, divY, playerX, playerY
 global imgHandle, imgHandle1, imgHandle2
 global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
-global stopFish
+global STOP
 
 Gui, +AlwaysOnTop
 Gui, Color, 0x272827
 Gui, Font, s8, sans-serif
-Gui, Add, Button, x10 y247 w50 h20 gReload, Reload
+Gui, Add, Button, x10 y247 w40 h20 gReload, Reload
 Gui, Add, Button, x10 y10 w80 h20 gConfigure, Configure
 Gui, Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
 Gui, Add, StatusBar,, Idle
@@ -257,7 +256,7 @@ useRevive() {
     Rev1:
 
     Send {XButton2}
-	ImageSearch, Rs, Sr, maxX - 2, maxY, maxX + 25, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
+	ImageSearch, Rs, Sr, maxX - 10, maxY, maxX + 35, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
 	if ErrorLevel = 1
 		goto,  Rev1
 
@@ -502,16 +501,70 @@ Configure:
         ;ToolTip, %divX% %divY%
         Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
         Gui, Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
-        Gui, Add, Button, x10 y100 w80 h20 gTest, Test
+        Gui, Add, Button, x10 y100 w80 h20 gConfigureNewRoute, New Route
+        Gui, Add, Button, x10 y100 w80 h20 gStartRoute, Start Route
+        Gui, Add, GroupBox, x10 y130 w170 h1
+        Gui, Add, Button, x10 y145 w80 h20 gTest, Test
+        Gui, Add, GroupBox, x60 y225 w120 h45, Route Name:
+        Gui, Add, Edit, Limit32 vRouteName x70 y240 w100
         return
 
 ; -------------------------------------------------------------------------------------------------------------------------------------
+
+ConfigureNewRoute:
+
+    a := 0
+    b := 0
+    oldCoordX := 0
+    oldCoordY := 0
+    STOP := 0
+
+    ToolTip, Enter route name and press Ctrl+Space, border1X, border1Y - 20
+
+    Loop {
+        if (STOP = 1 AND %RouteName% != "") {
+            break
+        }
+    }
+
+    STOP := 0
+
+    ToolTip, Recording new route`nPress Ctrl+Space to stop, border1X, border1Y - 40
+
+    Loop {
+
+    sleep, 100
+    
+    playerCoordX := ReadMemory(BASE_ADDRESS + 0xC)
+    playerCoordY := ReadMemory(BASE_ADDRESS + 0x10)
+
+    if (playerCoordX != oldCoordX OR playerCoordY != oldCoordY) {
+        IniWrite, %playerCoordX%, routes.rte, %RouteName%X, x%a%
+        IniWrite, %playerCoordY%, routes.rte, %RouteName%Y, y%a%
+        a++
+        oldCoordX := playerCoordX
+        oldCoordY := playerCoordY
+    }
+
+    if (STOP = 1) {
+        break
+    }
+
+    }
+
+return
+
+StartRoute:
+
+    
+
+return
 
 UseRevive:
 
     useRevive()
 
-    return
+return
 
 Test:
 
@@ -538,7 +591,7 @@ Test:
     sleep, 200
     }
 
-    return
+return
 
 CfgFish:
 
@@ -571,11 +624,11 @@ CfgFish:
     Gui, Add, Button, x100 y70 w80 h20 gFish, Auto Fish
     ToolTip
 
-    return
+return
 
 Fish:
 
-    stopFish := 0
+    STOP := 0
 
     calcSQM_X(fX)
     calcSQM_Y(fY)
@@ -595,7 +648,7 @@ Fish:
 
     StartFish:
 
-    if stopFish = 1
+    if STOP = 1
         return
 
     sleep, 2000
@@ -625,7 +678,7 @@ Fish:
     
     goto, StartFish
 
-    return
+return
 
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -641,13 +694,13 @@ Fish:
 
     ToolTip
 
-    stopFish := 1
+    STOP := 1
 
-    return
+return
 
 ^Esc::
     Reload:
     sleep, 700
     Reload
 
-    return
+return
