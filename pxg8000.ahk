@@ -30,20 +30,21 @@ SetFormat, Integer, d
 global skillX, skillY
 global pokeMenuX, pokeMenuY
 global maxX, maxY
-global divX, divY, playerX, playerY
+global divX, divY, playerX, playerY, centerX, centerY
 global imgHandle, imgHandle1, imgHandle2
 global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
+global RouteName
 
-Gui, +AlwaysOnTop
-Gui, Color, 0x272827
-Gui, Font, s8, sans-serif
-Gui, Add, Button, x10 y247 w40 h20 gReload, Reload
-Gui, Add, Button, x10 y10 w80 h20 gConfigure, Configure
-Gui, Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
-Gui, Add, StatusBar,, Idle
-Gui, Show, x1 y550 w190 h300, `t
+Gui, Main:New, +AlwaysOnTop
+Gui, Main:Color, 0x353535
+Gui, Main:Font, s8, sans-serif
+Gui, Main:Add, Button, x10 y267 w40 h20 gReload, Reload
+Gui, Main:Add, Button, x10 y10 w80 h20 gConfigure, Configure
+Gui, Main:Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
+Gui, Main:Add, StatusBar,, Idle
+Gui, Main:Show, x1 y550 w190 h320, `t
 return
 
 ; Functions
@@ -202,6 +203,22 @@ findPokemonPosition() {
         ToolTip
 
     
+
+}
+
+findRouteName(name) {
+
+
+
+}
+
+getBattleElements() {
+
+    battleElements := ReadMemory(BATTLE_BASE_ADDRESS + 0x30)
+    battleElements -= 308
+    battleElements := Round(battleElements / 25)
+
+    return battleElements
 
 }
 
@@ -496,17 +513,15 @@ Configure:
     endConfig:
         divX := (border2X - border1X) / 15
         divY := (border3Y - border1Y) / 11
-        playerX := ((border2X - border1X) / 2) + border1X 
-        playerY := ((border3Y - border1Y) / 2) + border1Y 
+        centerX := ((border2X - border1X) / 2) + border1X 
+        centerY := ((border3Y - border1Y) / 2) + border1Y 
         ;ToolTip, %divX% %divY%
-        Gui, Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
-        Gui, Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
-        Gui, Add, Button, x10 y100 w80 h20 gConfigureNewRoute, New Route
-        Gui, Add, Button, x10 y100 w80 h20 gStartRoute, Start Route
-        Gui, Add, GroupBox, x10 y130 w170 h1
-        Gui, Add, Button, x10 y145 w80 h20 gTest, Test
-        Gui, Add, GroupBox, x60 y225 w120 h45, Route Name:
-        Gui, Add, Edit, Limit32 vRouteName x70 y240 w100
+        Gui, Main:Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
+        Gui, Main:Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
+        Gui, Main:Add, Button, x10 y100 w80 h20 gNewRoutePrompt, New Route
+        Gui, Main:Add, Button, x100 y100 w80 h20 gStartRoutePrompt, Start Route
+        Gui, Main:Add, GroupBox, x10 y130 w170 h1
+        Gui, Main:Add, Button, x10 y145 w80 h20 gTest, Test
         return
 
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -519,13 +534,16 @@ ConfigureNewRoute:
     oldCoordY := 0
     STOP := 0
 
-    ToolTip, Enter route name and press Ctrl+Space, border1X, border1Y - 20
-
-    Loop {
-        if (STOP = 1 AND %RouteName% != "") {
-            break
-        }
+    Gui, NewRoute:Submit
+    if (STOP = 1 AND RouteName != "") {
+        return
+    } else if (RouteName = "") {
+        MsgBox Empty route name!
+        ToolTip
+        return
     }
+
+    IniWrite, %RouteName%, routes.rte, routes, %RouteName%
 
     STOP := 0
 
@@ -552,11 +570,78 @@ ConfigureNewRoute:
 
     }
 
+    MsgBox, Route created succesfully!
+
+return
+
+NewRoutePrompt:
+
+    Gui, NewRoute:New, +AlwaysOnTop
+    Gui, NewRoute:Color, 0x353535
+    Gui, NewRoute:Add, Edit, Limit32 VRouteName x10 y10 w180, Route Name
+    Gui, NewRoute:Add, Button, x10 y70 w180 gConfigureNewRoute, Create New Route
+    Gui, NewRoute:Show, x400 y400 w200 h100, `t
+
 return
 
 StartRoute:
 
-    
+    Gui, StartRoute:Submit
+    IniRead, Route, routes.rte, routes, %RouteName%, 0
+
+    a := 0
+
+    if (Route = 0) {
+        MsgBox Wrong route name!
+        return
+    }
+
+    Click, %centerX%, %centerY%
+
+    Loop {
+        IniRead, targetX, routes.rte, %Route%X, x%a%, 0
+        IniRead, targetY, routes.rte, %Route%Y, y%a%, 0
+
+        if (targetX = 0 OR targetY = 0) {
+            ;MsgBox, error %Route% %targetX% %targetY%
+            return
+        }
+
+        Loop {
+            playerX := ReadMemory(BASE_ADDRESS + 0xC)
+            playerY := ReadMemory(BASE_ADDRESS + 0x10)
+
+            if (playerX < targetX) {
+                Send {Right}
+            } else if (playerX > targetX) {
+                Send {Left}
+            }
+
+            if (playerY < targetY) {
+                Send {Down}
+            } else if (playerY > targetY) {
+                Send {Up}
+            }
+
+            if (playerX = targetX AND playerY = targetY) {
+                break
+            }
+            sleep, 50
+        }
+
+        a++
+
+    }
+
+return
+
+StartRoutePrompt:
+
+    Gui, StartRoute:New, +AlwaysOnTop
+    Gui, StartRoute:Color, 0x353535
+    Gui, StartRoute:Add, Edit, Limit32 VRouteName x10 y10 w180, Route Name
+    Gui, StartRoute:Add, Button, x10 y370 w180 gStartRoute, Start Route
+    Gui, StartRoute:Show, x%border1X% y%border1Y% w200 h400, `t
 
 return
 
@@ -568,7 +653,7 @@ return
 
 Test:
 
-    ; collectLoot(playerX, playerY)
+    ; collectLoot(centerX, centerY)
 
     ; Loop {
     ;     MouseGetPos, X, Y
@@ -621,7 +706,7 @@ CfgFish:
 
     sleep, 500
 
-    Gui, Add, Button, x100 y70 w80 h20 gFish, Auto Fish
+    Gui, Main:Add, Button, x100 y70 w80 h20 gFish, Auto Fish
     ToolTip
 
 return
@@ -644,7 +729,7 @@ Fish:
     ToolTip, To stop fishing press Ctrl+Space, border1X, border1Y - 20
 
     sleep, 400
-    Click, %playerX%, %playerY%
+    Click, %centerX%, %centerY%
 
     StartFish:
 
@@ -670,7 +755,7 @@ Fish:
 
     DoneFish:
 
-    collectLoot(playerX, playerY, 150)
+    collectLoot(centerX, centerY, 150)
 
     sleep, 500
 
@@ -686,7 +771,7 @@ return
 
 ; Numpad5::
 
-;     collectLoot(playerX, playerY)
+;     collectLoot(centerX, centerY)
 
 ;     return
 
