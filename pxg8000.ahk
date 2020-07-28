@@ -33,9 +33,11 @@ global maxX, maxY
 global divX, divY, playerX, playerY, centerX, centerY
 global imgHandle, imgHandle1, imgHandle2
 global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
+global playerCoord := []
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
-global RouteName
+global RouteName, MaxLure, CheckLoot
+global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10 
 
 Gui, Main:New, +AlwaysOnTop
 Gui, Main:Color, 0x353535
@@ -45,7 +47,122 @@ Gui, Main:Add, Button, x10 y10 w80 h20 gConfigure, Configure
 Gui, Main:Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
 Gui, Main:Add, StatusBar,, Idle
 Gui, Main:Show, x1 y550 w190 h320, `t
+
+; Skills Offsets
+; -------------------------------------------------------------------------------------------------------------------------------------
+
+global SKILL_1 := 0x007C5CC0
+SetFormat, Integer, hex
+SKILL_1 := ReadMemory(SKILL_1)
+SKILL_1 := ReadMemory(SKILL_1 + 0x9C)
+SKILL_1 := ReadMemory(SKILL_1 + 0x60)
+SKILL_1 := ReadMemory(SKILL_1 + 0x0)
+SKILL_1 := ReadMemory(SKILL_1 + 0x28)
+SKILL_1 := ReadMemory(SKILL_1 + 0x54)
+SKILL_1 := ReadMemory(SKILL_1 + 0x0)
+SKILL_1 := ReadMemory(SKILL_1 + 0x9C)
+
+global SKILL_2 := 0x007C5CC0
+SKILL_2 := ReadMemory(SKILL_2)
+SKILL_2 := ReadMemory(SKILL_2 + 0x9C)
+SKILL_2 := ReadMemory(SKILL_2 + 0x54)
+SKILL_2 := ReadMemory(SKILL_2 + 0x28)
+SKILL_2 := ReadMemory(SKILL_2 + 0x54)
+SKILL_2 := ReadMemory(SKILL_2 + 0x4)
+SKILL_2 := ReadMemory(SKILL_2 + 0x54)
+SKILL_2 := ReadMemory(SKILL_2 + 0x0)
+
+global SKILL_3 := 0x007C5CC0
+SKILL_3 := ReadMemory(SKILL_3)
+SKILL_3 := ReadMemory(SKILL_3 + 0x9C)
+SKILL_3 := ReadMemory(SKILL_3 + 0x60)
+SKILL_3 := ReadMemory(SKILL_3 + 0x0)
+SKILL_3 := ReadMemory(SKILL_3 + 0x28)
+SKILL_3 := ReadMemory(SKILL_3 + 0x54)
+SKILL_3 := ReadMemory(SKILL_3 + 0x8)
+SKILL_3 := ReadMemory(SKILL_3 + 0x9C)
+
+global SKILL_4 := 0x007C5CC0
+SKILL_4 := ReadMemory(SKILL_4)
+SKILL_4 := ReadMemory(SKILL_4 + 0x9C)
+SKILL_4 := ReadMemory(SKILL_4 + 0x54)
+SKILL_4 := ReadMemory(SKILL_4 + 0x28)
+SKILL_4 := ReadMemory(SKILL_4 + 0x54)
+SKILL_4 := ReadMemory(SKILL_4 + 0xC)
+SKILL_4 := ReadMemory(SKILL_4 + 0x54)
+SKILL_4 := ReadMemory(SKILL_4 + 0x0)
+
+global SKILL_5 := 0x007C5CC0
+SKILL_5 := ReadMemory(SKILL_5)
+SKILL_5 := ReadMemory(SKILL_5 + 0x54)
+SKILL_5 := ReadMemory(SKILL_5 + 0x0)
+SKILL_5 := ReadMemory(SKILL_5 + 0x60)
+SKILL_5 := ReadMemory(SKILL_5 + 0x0)
+SKILL_5 := ReadMemory(SKILL_5 + 0x28)
+SKILL_5 := ReadMemory(SKILL_5 + 0x54)
+SKILL_5 := ReadMemory(SKILL_5 + 0x10)
+SKILL_5 := ReadMemory(SKILL_5 + 0x9C)
+
+global SKILL_6 := 0x007C5CC0
+SKILL_6 := ReadMemory(SKILL_6)
+SKILL_6 := ReadMemory(SKILL_6 + 0x9C)
+SKILL_6 := ReadMemory(SKILL_6 + 0x54)
+SKILL_6 := ReadMemory(SKILL_6 + 0x28)
+SKILL_6 := ReadMemory(SKILL_6 + 0x54)
+SKILL_6 := ReadMemory(SKILL_6 + 0x14)
+SKILL_6 := ReadMemory(SKILL_6 + 0x60)
+SKILL_6 := ReadMemory(SKILL_6 + 0x0)
+SKILL_6 := ReadMemory(SKILL_6 + 0x0)
+
+global SKILL_7 := 0x007C5CC0
+SKILL_7 := ReadMemory(SKILL_7)
+SKILL_7 := ReadMemory(SKILL_7 + 0x9C)
+SKILL_7 := ReadMemory(SKILL_7 + 0x60)
+SKILL_7 := ReadMemory(SKILL_7 + 0x0)
+SKILL_7 := ReadMemory(SKILL_7 + 0x28)
+SKILL_7 := ReadMemory(SKILL_7 + 0x54)
+SKILL_7 := ReadMemory(SKILL_7 + 0x18)
+SKILL_7 := ReadMemory(SKILL_7 + 0x54)
+SKILL_7 := ReadMemory(SKILL_7 + 0x0)
+
+global SKILL_8 := 0x007C5CC0
+SKILL_8 := ReadMemory(SKILL_8)
+SKILL_8 := ReadMemory(SKILL_8 + 0x9C)
+SKILL_8 := ReadMemory(SKILL_8 + 0x54)
+SKILL_8 := ReadMemory(SKILL_8 + 0x28)
+SKILL_8 := ReadMemory(SKILL_8 + 0x54)
+SKILL_8 := ReadMemory(SKILL_8 + 0x1C)
+SKILL_8 := ReadMemory(SKILL_8 + 0x44)
+SKILL_8 := ReadMemory(SKILL_8 + 0x14)
+SKILL_8 := ReadMemory(SKILL_8 + 0x9C)
+
+global SKILL_9 := 0x007C5CC0
+SKILL_9 := ReadMemory(SKILL_9)
+SKILL_9 := ReadMemory(SKILL_9 + 0x9C)
+SKILL_9 := ReadMemory(SKILL_9 + 0x54)
+SKILL_9 := ReadMemory(SKILL_9 + 0x28)
+SKILL_9 := ReadMemory(SKILL_9 + 0x54)
+SKILL_9 := ReadMemory(SKILL_9 + 0x20)
+SKILL_9 := ReadMemory(SKILL_9 + 0x60)
+SKILL_9 := ReadMemory(SKILL_9 + 0x0)
+SKILL_9 := ReadMemory(SKILL_9 + 0x0)
+
+global SKILL_10 := 0x007C5CC0
+SKILL_10 := ReadMemory(SKILL_10)
+SKILL_10 := ReadMemory(SKILL_10 + 0x9C)
+SKILL_10 := ReadMemory(SKILL_10 + 0x60)
+SKILL_10 := ReadMemory(SKILL_10 + 0x0)
+SKILL_10 := ReadMemory(SKILL_10 + 0x28)
+SKILL_10 := ReadMemory(SKILL_10 + 0x54)
+SKILL_10 := ReadMemory(SKILL_10 + 0x24)
+SKILL_10 := ReadMemory(SKILL_10 + 0x54)
+SKILL_10 := ReadMemory(SKILL_10 + 0x0)
+
+SetFormat, Integer, d
+
 return
+
+; -------------------------------------------------------------------------------------------------------------------------------------
 
 ; Functions
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +233,40 @@ calcCoord_Y(Y) {
     posY := posY + calcSQM_Y(Y)
 
     return posY
+
+}
+
+calcScreenCoordByCoordX(X) {
+
+    a := ReadMemory(BASE_ADDRESS + 0xC)
+
+    if (a > X) {
+        a := centerX - (divX * (a - X))
+        return a
+    }
+    if (a <= X) {
+        a := centerX + (divX * (X - a))
+        return a
+    }
+
+    return
+
+}
+
+calcScreenCoordByCoordY(Y) {
+
+    a := ReadMemory(BASE_ADDRESS + 0x10)
+
+    if (a > Y) {
+        a := centerY - (divY * (a - Y))
+        return a
+    }
+    if (a <= Y) {
+        a := centerY + (divY * (Y - a))
+        return a
+    }
+
+    return
 
 }
 
@@ -222,6 +373,15 @@ getBattleElements() {
 
 }
 
+getPlayerCoord() {
+
+    playerCoord[0] := ReadMemory(BASE_ADDRESS + 0xC)
+    playerCoord[1] := ReadMemory(BASE_ADDRESS + 0x10)
+
+    return
+
+}
+
 ReadMemory(address, type := "UInt") {
 
     static aTypeSize := {    "UChar":    1,  "Char":     1
@@ -248,6 +408,86 @@ ReadMemory(address, type := "UInt") {
 
 }
 
+useSkills(cd1 = 0, cd2 = 0, cd3 = 0, cd4 = 0, cd5 = 0, cd6 = 0, cd7 = 0, cd8 = 0, cd9 = 0, cd10 = 0) {
+
+    SetFormat, Integer, hex
+
+    if (cd1 = 1) {
+        Loop {
+            Send {F1} 
+            if ReadMemory(SKILL_1 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd2 = 1) {
+        Loop {
+            Send {F2}
+            if ReadMemory(SKILL_2 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd3 = 1) {
+        Loop {
+            Send {F3}
+            if ReadMemory(SKILL_3 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd4 = 1) {
+        Loop {
+            Send {F4}
+            if ReadMemory(SKILL_4 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd5 = 1) {
+        Loop {
+            Send {F5}
+            if ReadMemory(SKILL_5 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd6 = 1) {
+        Loop {
+            Send {F6}
+            if ReadMemory(SKILL_6 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd7 = 1) {
+        Loop {
+            Send {F7}
+            if ReadMemory(SKILL_7 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd8 = 1) {
+        Loop {
+            Send {F8}
+            if ReadMemory(SKILL_8 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd9 = 1) {
+        Loop {
+            Send {F9}
+            if ReadMemory(SKILL_9 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+    if (cd10 = 1) {
+        Loop {
+            Send {F10}
+            if ReadMemory(SKILL_10 + 0x2C0, "UFloat") != 100
+                break
+        }
+    }
+
+    SetFormat, Integer, d
+
+    return
+
+}
 
 useRevive() {
     RevX := pokeMenuX + 20
@@ -549,22 +789,26 @@ ConfigureNewRoute:
 
     ToolTip, Recording new route`nPress Ctrl+Space to stop, border1X, border1Y - 40
 
+    Click, %centerX%, %centerY%
+
     Loop {
 
     sleep, 100
     
-    playerCoordX := ReadMemory(BASE_ADDRESS + 0xC)
-    playerCoordY := ReadMemory(BASE_ADDRESS + 0x10)
+    playerX := ReadMemory(BASE_ADDRESS + 0xC)
+    playerY := ReadMemory(BASE_ADDRESS + 0x10)
 
-    if (playerCoordX != oldCoordX OR playerCoordY != oldCoordY) {
-        IniWrite, %playerCoordX%, routes.rte, %RouteName%X, x%a%
-        IniWrite, %playerCoordY%, routes.rte, %RouteName%Y, y%a%
+    if (playerX != oldCoordX OR playerY != oldCoordY) {
+        IniWrite, %playerX%, routes.rte, %RouteName%X, x%a%
+        IniWrite, %playerY%, routes.rte, %RouteName%Y, y%a%
         a++
-        oldCoordX := playerCoordX
-        oldCoordY := playerCoordY
+        oldCoordX := playerX
+        oldCoordY := playerY
     }
 
     if (STOP = 1) {
+        IniWrite, 0, routes.rte, %RouteName%X, x%a%
+        IniWrite, 0, routes.rte, %RouteName%Y, y%a%
         break
     }
 
@@ -626,7 +870,45 @@ StartRoute:
             if (playerX = targetX AND playerY = targetY) {
                 break
             }
-            sleep, 50
+        }
+
+        if (getBattleElements() >= MaxLure + 1) {
+
+            a -= 2
+            IniRead, oldCoordX, routes.rte, %Route%X, x%a%, 0
+            IniRead, oldCoordY, routes.rte, %Route%Y, y%a%, 0
+            a += 2
+
+            X := calcScreenCoordByCoordX(oldCoordX)
+            Y := calcScreenCoordByCoordY(oldCoordY)
+
+            BlockInput, MouseMove
+            MouseMove, X, Y
+            sleep, 40
+            Send {MButton}
+            BlockInput, MouseMoveOff
+
+            sleep, 4000
+
+            useSkills(CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10)
+
+            sleep, 1000
+
+            ToolTip, abc %oldCoordX% %oldCoordY%
+
+            if (CheckLoot = 1) {
+                BlockInput, MouseMove
+                MouseMove, X, Y
+                sleep, 40
+                Click
+                BlockInput, MouseMoveOff
+                Loop {
+                    getPlayerCoord()
+                    if (playerCoord[0] = oldCoordX AND playerCoord[1] = oldCoordY)
+                        sleep, 350
+                        collectLoot(x, y)
+                }    
+            }
         }
 
         a++
@@ -639,7 +921,21 @@ StartRoutePrompt:
 
     Gui, StartRoute:New, +AlwaysOnTop
     Gui, StartRoute:Color, 0x353535
-    Gui, StartRoute:Add, Edit, Limit32 VRouteName x10 y10 w180, Route Name
+    Gui, StartRoute:Font, s8 cFFFFFF, sans-serif
+    Gui, StartRoute:Add, Edit, Limit32 vRouteName c000000 x10 y10 w180, Route Name
+    Gui, StartRoute:Add, Text, x10 y40, Max Pokemons to lure:
+    Gui, StartRoute:Add, DropDownList, vMaxLure, 1|2|3|4||5|6|7|8
+    Gui, StartRoute:Add, Checkbox, vCheckLoot Checked0, Collect Loot?
+    Gui, StartRoute:Add, Checkbox, vCheckSkill1 Checked0 x130, Skill 1
+    Gui, StartRoute:Add, Checkbox, vCheckSkill2 Checked0 x130, Skill 2
+    Gui, StartRoute:Add, Checkbox, vCheckSkill3 Checked0 x130, Skill 3
+    Gui, StartRoute:Add, Checkbox, vCheckSkill4 Checked0 x130, Skill 4
+    Gui, StartRoute:Add, Checkbox, vCheckSkill5 Checked0 x130, Skill 5
+    Gui, StartRoute:Add, Checkbox, vCheckSkill6 Checked0 x130, Skill 6
+    Gui, StartRoute:Add, Checkbox, vCheckSkill7 Checked0 x130, Skill 7
+    Gui, StartRoute:Add, Checkbox, vCheckSkill8 Checked0 x130, Skill 8
+    Gui, StartRoute:Add, Checkbox, vCheckSkill9 Checked0 x130, Skill 9
+    Gui, StartRoute:Add, Checkbox, vCheckSkill10 Checked0 x130, Skill 10
     Gui, StartRoute:Add, Button, x10 y370 w180 gStartRoute, Start Route
     Gui, StartRoute:Show, x%border1X% y%border1Y% w200 h400, `t
 
@@ -666,15 +962,20 @@ Test:
 
     ; ToolTip, %posX%
 
-    Loop {
-    Rs := ReadMemory(BATTLE_BASE_ADDRESS + 0x30)
+    getPlayerCoord()
+    a := playerCoord[0]
+    b := playerCoord[1]
+    b := calcScreenCoordByCoordX(a - 2)
+    ToolTip, %a% %b% , battleMenuX, battleMenuY
 
-    Rs -= 308
-    Rs := Round(Rs / 25)
+    sleep, 400
 
-    ToolTip, Elementos no Battle: %Rs%, battleMenuX, battleMenuY
-    sleep, 200
-    }
+    Click, %centerX%, %centerY%
+    sleep, 100
+
+    ;useSkills(0,0,0,0,0,1,0,1,0,0)
+
+    ;ToolTip 
 
 return
 
