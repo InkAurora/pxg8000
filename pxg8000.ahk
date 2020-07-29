@@ -36,7 +36,7 @@ global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, bor
 global playerCoord := []
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
-global RouteName, MaxLure, CheckLoot
+global RouteName, MaxLure, CheckLoot, CheckRevive
 global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10 
 
 Gui, Main:New, +AlwaysOnTop
@@ -408,6 +408,49 @@ ReadMemory(address, type := "UInt") {
 
 }
 
+useRevive() {
+    RevX := pokeMenuX + 20
+    RevY := pokeMenuY + 75
+
+    imgHandle1 := LoadPicture("imagesNew/max.png")
+
+    ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
+    if (ErrorLevel = 0) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+		MouseMove, RevX, RevY
+		sleep, 20
+		Click, right
+    }
+    else if (ErrorLevel = 1) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+        MouseMove, RevX, RevY
+        sleep, 20
+    }
+
+    Rev1:
+
+    Send {XButton2}
+	ImageSearch, Rs, Sr, maxX - 10, maxY, maxX + 35, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
+	if ErrorLevel = 1
+		goto,  Rev1
+
+    imgHandle2 := LoadPicture("imagesNew/revOut.png")
+
+	Loop {
+		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF HBITMAP:*%imgHandle2%
+		if ErrorLevel = 1 
+			Click, right
+		else
+			goto, Ok1
+	}
+
+    Ok1:
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+}
+
 useSkills(cd1 = 0, cd2 = 0, cd3 = 0, cd4 = 0, cd5 = 0, cd6 = 0, cd7 = 0, cd8 = 0, cd9 = 0, cd10 = 0) {
 
     SetFormat, Integer, hex
@@ -489,56 +532,9 @@ useSkills(cd1 = 0, cd2 = 0, cd3 = 0, cd4 = 0, cd5 = 0, cd6 = 0, cd7 = 0, cd8 = 0
 
 }
 
-useRevive() {
-    RevX := pokeMenuX + 20
-    RevY := pokeMenuY + 75
-
-    imgHandle1 := LoadPicture("imagesNew/max.png")
-
-    ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
-    if (ErrorLevel = 0) {
-        BlockInput, MouseMove
-        MouseGetPos, X, Y
-		MouseMove, RevX, RevY
-		sleep, 20
-		Click, right
-    }
-    else if (ErrorLevel = 1) {
-        BlockInput, MouseMove
-        MouseGetPos, X, Y
-        MouseMove, RevX, RevY
-        sleep, 20
-    }
-
-    Rev1:
-
-    Send {XButton2}
-	ImageSearch, Rs, Sr, maxX - 10, maxY, maxX + 35, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
-	if ErrorLevel = 1
-		goto,  Rev1
-
-    imgHandle2 := LoadPicture("imagesNew/revOut.png")
-
-	Loop {
-		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF HBITMAP:*%imgHandle2%
-		if ErrorLevel = 1 
-			Click, right
-		else
-			goto, Ok1
-	}
-
-    Ok1:
-    MouseMove, X, Y
-    BlockInput, MouseMoveOff
-}
-
 ; Labels
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
-
-GuiClose:
-    ExitApp
-    return
 
 FirstTimeConfigure:
 
@@ -766,6 +762,10 @@ Configure:
 
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
+MainGuiClose:
+    ExitApp
+    return
+
 ConfigureNewRoute:
 
     a := 0
@@ -892,9 +892,7 @@ StartRoute:
 
             useSkills(CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10)
 
-            sleep, 1000
-
-            ToolTip, abc %oldCoordX% %oldCoordY%
+            sleep, 4000
 
             if (CheckLoot = 1) {
                 BlockInput, MouseMove
@@ -904,11 +902,21 @@ StartRoute:
                 BlockInput, MouseMoveOff
                 Loop {
                     getPlayerCoord()
-                    if (playerCoord[0] = oldCoordX AND playerCoord[1] = oldCoordY)
+                    Rs := playerCoord[0]
+                    Sr := playerCoord[1]
+                    if (Rs = oldCoordX AND Sr = oldCoordY) {
                         sleep, 350
-                        collectLoot(x, y)
+                        collectLoot(centerX, centerY)
+                        sleep, 1000
+                        break
+                    }
                 }    
             }
+
+            if (CheckRevive = 1) {
+                useRevive()
+            }
+
         }
 
         a++
@@ -926,7 +934,7 @@ StartRoutePrompt:
     Gui, StartRoute:Add, Text, x10 y40, Max Pokemons to lure:
     Gui, StartRoute:Add, DropDownList, vMaxLure, 1|2|3|4||5|6|7|8
     Gui, StartRoute:Add, Checkbox, vCheckLoot Checked0, Collect Loot?
-    Gui, StartRoute:Add, Checkbox, vCheckSkill1 Checked0 x130, Skill 1
+    Gui, StartRoute:Add, Checkbox, vCheckSkill1 Checked0 x130 y86, Skill 1
     Gui, StartRoute:Add, Checkbox, vCheckSkill2 Checked0 x130, Skill 2
     Gui, StartRoute:Add, Checkbox, vCheckSkill3 Checked0 x130, Skill 3
     Gui, StartRoute:Add, Checkbox, vCheckSkill4 Checked0 x130, Skill 4
@@ -936,6 +944,7 @@ StartRoutePrompt:
     Gui, StartRoute:Add, Checkbox, vCheckSkill8 Checked0 x130, Skill 8
     Gui, StartRoute:Add, Checkbox, vCheckSkill9 Checked0 x130, Skill 9
     Gui, StartRoute:Add, Checkbox, vCheckSkill10 Checked0 x130, Skill 10
+    Gui, StartRoute:Add, Checkbox, vCheckRevive Checked0 x10 y105, Use Revive?
     Gui, StartRoute:Add, Button, x10 y370 w180 gStartRoute, Start Route
     Gui, StartRoute:Show, x%border1X% y%border1Y% w200 h400, `t
 
