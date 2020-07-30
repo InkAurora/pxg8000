@@ -1056,7 +1056,7 @@ Fish:
     Click
     BlockInput, MouseMoveOff
 
-    sleep, 300
+    sleep, 3000
 
     collectLoot(centerX, centerY, 250)
 
