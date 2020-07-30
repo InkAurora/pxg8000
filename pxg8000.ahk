@@ -605,11 +605,11 @@ Configure:
 
     AdjustMinimap:
 
-    ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/minimap.png
+    ImageSearch, minimapX, minimapY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/minimap.png
     if ErrorLevel = 1
         goto, AdjustMinimap
 
-    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/minimap2.png
+    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/minimap2.png
     if ErrorLevel = 1
         goto, AdjustMinimap
  
