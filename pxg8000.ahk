@@ -642,13 +642,13 @@ Configure:
 
     FindPokeMenu:
 
-    ImageSearch, pokeMenuX, pokeMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/pokeMenu.png
+    ImageSearch, pokeMenuX, pokeMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/pokeMenu.png
     if ErrorLevel = 1
         goto, FindPokeMenu
 
     ToolTip
     
-    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, ./imagesNew/pokeMenu2.png
+    ImageSearch, a, b, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./imagesNew/pokeMenu2.png
     if (ErrorLevel = 0) {
         Tooltip, Equip a Pokemon to proceed, pokeMenuX, pokeMenuY - 30
         sleep, 2000
@@ -659,11 +659,11 @@ Configure:
 
     FindBattleMenu:
 
-    ImageSearch, battleMenuX, battleMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/battleMenu.png
+    ImageSearch, battleMenuX, battleMenuY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/battleMenu.png
     if ErrorLevel = 1
         goto, FindBattleMenu
 
-    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu2.png
+    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, *10 ./imagesNew/battleMenu2.png
     if (ErrorLevel = 0) {
         BlockInput, MouseMove
         MouseMove, battleMenuX + 75, battleMenuY + 10
@@ -674,7 +674,7 @@ Configure:
         BlockInput, MouseMoveOff
     }
 
-    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, ./imagesNew/battleMenu3.png
+    ImageSearch, a, b, battleMenuX, battleMenuY, battleMenuX + 190, battleMenuY + 40, *10 ./imagesNew/battleMenu3.png
     if (ErrorLevel = 0) {
         BlockInput, MouseMove
         MouseMove, battleMenuX + 95, battleMenuY + 10
@@ -691,7 +691,7 @@ Configure:
 
     sleep, 500
 
-    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/skillMenu.png
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/skillMenu.png
     if (ErrorLevel = 1) {
         BlockInput, MouseMove
         MouseMove, pokeMenuX + 20, pokeMenuY + 75
@@ -715,7 +715,7 @@ Configure:
     sleep, 40
     MouseMove, X, Y
     sleep, 40
-    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/skillMenu.png
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/skillMenu.png
     if ErrorLevel = 1
         goto, FindSkillMenu
     skillX -= 18
@@ -735,7 +735,7 @@ Configure:
 
     ConfigRevive:
 
-    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/max.png
+    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/max.png
     if ErrorLevel = 1
         goto, ConfigRevive
     
