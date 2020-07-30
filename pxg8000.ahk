@@ -1061,7 +1061,7 @@ Fish:
     collectLoot(centerX, centerY, 250)
 
     FishLoop:
-        ImageSearch, sR, Rs, a, b, c, d, *100 *Trans0x0000FF HBITMAP:*%imgHandle1%
+        ImageSearch, sR, Rs, a, b, c, d, *110 *Trans0x0000FF HBITMAP:*%imgHandle1%
         if ErrorLevel = 0
             goto, DoneFish
         else
