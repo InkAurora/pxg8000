@@ -1056,6 +1056,10 @@ Fish:
     Click
     BlockInput, MouseMoveOff
 
+    sleep, 300
+
+    collectLoot(centerX, centerY, 250)
+
     FishLoop:
         ImageSearch, sR, Rs, a, b, c, d, *100 *Trans0x0000FF HBITMAP:*%imgHandle1%
         if ErrorLevel = 0
@@ -1064,8 +1068,6 @@ Fish:
             goto, FishLoop
 
     DoneFish:
-
-    collectLoot(centerX, centerY, 150)
 
     sleep, 500
 
