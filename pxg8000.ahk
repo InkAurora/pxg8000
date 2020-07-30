@@ -709,7 +709,7 @@ Configure:
     Click, down
     MouseMove, border1X + 100, border1Y + 100
     sleep, 25
-    MouseMove, border1X + 957, border1Y + 42
+    MouseMove, border2X + 2, border2Y + 50
     sleep, 40
     Click, up
     sleep, 40
