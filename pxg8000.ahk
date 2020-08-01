@@ -533,10 +533,12 @@ useSkills(cds := "") {
     Loop, Parse, cds, `,
     {
         SetFormat, Integer, hex
-        Loop {
-            Send {F%A_LoopField%}
-            if ReadMemory(SKILL_%A_LoopField% + 0x2C0, "UFloat") != 100
-                break
+        if (A_LoopField != "") {
+            Loop {
+                Send {F%A_LoopField%}
+                if ReadMemory(SKILL_%A_LoopField% + 0x2C0, "UFloat") != 100
+                    break
+            }
         }
         SetFormat, Integer, d
     }
@@ -865,6 +867,10 @@ StartRoute:
 
     Click, %centerX%, %centerY%
 
+    if (CheckDefenseCd) {
+        EnableDefense := 1
+    }
+
     Loop {
         IniRead, targetX, routes.rte, %Route%X, x%a%, 0
         IniRead, targetY, routes.rte, %Route%Y, y%a%, 0
@@ -895,9 +901,9 @@ StartRoute:
             }
         }
 
-        if (isOnBattle() AND CheckDefenseCd) {
-            sleep, 2000
+        if (isOnBattle() AND EnableDefense AND getBattleElements() >= 3) {
             useSkills(DefenseSkill)
+            EnableDefense := 0
         }
 
         if (getBattleElements() >= MaxLure + 1) {
@@ -934,6 +940,10 @@ StartRoute:
 
             if (CheckRevive = 1) {
                 useRevive()
+            }
+
+            if (CheckDefenseCd) {
+                EnableDefense := 1
             }
 
         }
