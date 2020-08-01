@@ -36,8 +36,9 @@ global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, bor
 global playerCoord := []
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
-global RouteName, MaxLure, CheckLoot, CheckRevive
-global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10 
+global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill
+global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10
+global CDOrder
 
 Gui, Main:New, +AlwaysOnTop
 Gui, Main:Color, 0x353535
@@ -158,6 +159,12 @@ SKILL_10 := ReadMemory(SKILL_10 + 0x24)
 SKILL_10 := ReadMemory(SKILL_10 + 0x54)
 SKILL_10 := ReadMemory(SKILL_10 + 0x0)
 
+global IS_ON_BATTLE := 0x007C5820
+IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE)
+IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x124)
+IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x0)
+IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x1C)
+
 SetFormat, Integer, d
 
 return
@@ -270,9 +277,37 @@ calcScreenCoordByCoordY(Y) {
 
 }
 
-collectLoot(pX, pY, delay = 50) {
+collectLoot(X, Y, mode = 1, delay = 50) {
 
-    BlockInput, MouseMove
+    if (mode = 2) {
+        a := calcScreenCoordByCoordX(X)
+        b := calcScreenCoordByCoordY(Y)
+
+        getPlayerCoord()
+        oldCoordX := playerCoord[0]
+        oldCoordY := playerCoord[1]
+
+        BlockInput, MouseMove
+        MouseMove, a, b
+        sleep, 40
+        Click
+
+        Loop {
+            getPlayerCoord()
+            Rs := playerCoord[0]
+            Sr := playerCoord[1]
+            if (Rs = X AND Sr = Y) {
+                sleep, 2500
+                break
+            }
+        }
+
+        BlockInput, MouseMoveOff
+    }
+
+    getPlayerCoord()
+    pX := centerX
+    pY := centerY
 
     LOOT := []
 
@@ -341,6 +376,25 @@ collectLoot(pX, pY, delay = 50) {
 	Sleep, delay
 	Click, right, LOOT[14], LOOT[15]
 
+    if (mode = 2) {
+        a := calcScreenCoordByCoordX(oldCoordX)
+        b := calcScreenCoordByCoordY(oldCoordY)
+
+        BlockInput, MouseMove
+        MouseMove, a, b
+        sleep, 40
+        Click
+
+        Loop {
+            getPlayerCoord()
+            Rs := playerCoord[0]
+            Sr := playerCoord[1]
+            if (Rs = oldCoordX AND Sr = oldCoordY) {
+                break
+            }
+        }
+    }
+
     BlockInput, MouseMoveOff
 
     return
@@ -380,6 +434,27 @@ getPlayerCoord() {
 
     return
 
+}
+
+isOnBattle() {
+
+    a := ReadMemory(IS_ON_BATTLE + 0x4)
+    if (a = 1) {
+        return 0
+    } else if (a = 2) {
+        return 1
+    }
+
+}
+
+loopParseMatch(var, match) {
+    Loop, parse, match, `,
+    {
+        if var = %A_LoopField%
+            return 1
+    }
+
+    return 0
 }
 
 ReadMemory(address, type := "UInt") {
@@ -451,82 +526,20 @@ useRevive() {
     BlockInput, MouseMoveOff
 }
 
-useSkills(cd1 = 0, cd2 = 0, cd3 = 0, cd4 = 0, cd5 = 0, cd6 = 0, cd7 = 0, cd8 = 0, cd9 = 0, cd10 = 0) {
+useSkills(cds := "") {
 
-    SetFormat, Integer, hex
+    StartCD:
 
-    if (cd1 = 1) {
+    Loop, Parse, cds, `,
+    {
+        SetFormat, Integer, hex
         Loop {
-            Send {F1} 
-            if ReadMemory(SKILL_1 + 0x2C0, "UFloat") != 100
+            Send {F%A_LoopField%}
+            if ReadMemory(SKILL_%A_LoopField% + 0x2C0, "UFloat") != 100
                 break
         }
+        SetFormat, Integer, d
     }
-    if (cd2 = 1) {
-        Loop {
-            Send {F2}
-            if ReadMemory(SKILL_2 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd3 = 1) {
-        Loop {
-            Send {F3}
-            if ReadMemory(SKILL_3 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd4 = 1) {
-        Loop {
-            Send {F4}
-            if ReadMemory(SKILL_4 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd5 = 1) {
-        Loop {
-            Send {F5}
-            if ReadMemory(SKILL_5 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd6 = 1) {
-        Loop {
-            Send {F6}
-            if ReadMemory(SKILL_6 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd7 = 1) {
-        Loop {
-            Send {F7}
-            if ReadMemory(SKILL_7 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd8 = 1) {
-        Loop {
-            Send {F8}
-            if ReadMemory(SKILL_8 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd9 = 1) {
-        Loop {
-            Send {F9}
-            if ReadMemory(SKILL_9 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-    if (cd10 = 1) {
-        Loop {
-            Send {F10}
-            if ReadMemory(SKILL_10 + 0x2C0, "UFloat") != 100
-                break
-        }
-    }
-
-    SetFormat, Integer, d
 
     return
 
@@ -758,13 +771,23 @@ Configure:
         Gui, Main:Add, Button, x100 y100 w80 h20 gStartRoutePrompt, Start Route
         Gui, Main:Add, GroupBox, x10 y130 w170 h1
         Gui, Main:Add, Button, x10 y145 w80 h20 gTest, Test
-        return
+
+return
 
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
 MainGuiClose:
     ExitApp
-    return
+return
+
+StartRouteGuiClose:
+    STOP := 1
+    Gui, StartRoute:Cancel
+return
+
+ASDSeilaMermao:
+    startRoute := 1
+return
 
 ConfigureNewRoute:
 
@@ -872,6 +895,11 @@ StartRoute:
             }
         }
 
+        if (isOnBattle() AND CheckDefenseCd) {
+            sleep, 2000
+            useSkills(DefenseSkill)
+        }
+
         if (getBattleElements() >= MaxLure + 1) {
 
             a -= 2
@@ -890,27 +918,18 @@ StartRoute:
 
             sleep, 4000
 
-            useSkills(CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10)
+            useSkills(CDOrder)
 
-            sleep, 4000
+            Loop {
+                if (isOnBattle()) {
+
+                } else {
+                    break
+                }
+            }
 
             if (CheckLoot = 1) {
-                BlockInput, MouseMove
-                MouseMove, X, Y
-                sleep, 40
-                Click
-                BlockInput, MouseMoveOff
-                Loop {
-                    getPlayerCoord()
-                    Rs := playerCoord[0]
-                    Sr := playerCoord[1]
-                    if (Rs = oldCoordX AND Sr = oldCoordY) {
-                        sleep, 350
-                        collectLoot(centerX, centerY)
-                        sleep, 1000
-                        break
-                    }
-                }    
+                collectLoot(oldCoordX, oldCoordY, 2)
             }
 
             if (CheckRevive = 1) {
@@ -927,6 +946,10 @@ return
 
 StartRoutePrompt:
 
+    CDOrder := ""
+    STOP := 0
+    startRoute := 0
+
     Gui, StartRoute:New, +AlwaysOnTop
     Gui, StartRoute:Color, 0x353535
     Gui, StartRoute:Font, s8 cFFFFFF, sans-serif
@@ -934,19 +957,56 @@ StartRoutePrompt:
     Gui, StartRoute:Add, Text, x10 y40, Max Pokemons to lure:
     Gui, StartRoute:Add, DropDownList, vMaxLure, 1|2|3|4||5|6|7|8
     Gui, StartRoute:Add, Checkbox, vCheckLoot Checked0, Collect Loot?
-    Gui, StartRoute:Add, Checkbox, vCheckSkill1 Checked0 x130 y86, Skill 1
-    Gui, StartRoute:Add, Checkbox, vCheckSkill2 Checked0 x130, Skill 2
-    Gui, StartRoute:Add, Checkbox, vCheckSkill3 Checked0 x130, Skill 3
-    Gui, StartRoute:Add, Checkbox, vCheckSkill4 Checked0 x130, Skill 4
-    Gui, StartRoute:Add, Checkbox, vCheckSkill5 Checked0 x130, Skill 5
-    Gui, StartRoute:Add, Checkbox, vCheckSkill6 Checked0 x130, Skill 6
-    Gui, StartRoute:Add, Checkbox, vCheckSkill7 Checked0 x130, Skill 7
-    Gui, StartRoute:Add, Checkbox, vCheckSkill8 Checked0 x130, Skill 8
-    Gui, StartRoute:Add, Checkbox, vCheckSkill9 Checked0 x130, Skill 9
-    Gui, StartRoute:Add, Checkbox, vCheckSkill10 Checked0 x130, Skill 10
+    Gui, StartRoute:Add, Checkbox, vCheckSkill1 Checked0 x145 y43, Skill 1
+    Gui, StartRoute:Add, Checkbox, vCheckSkill2 Checked0 x145 y62, Skill 2
+    Gui, StartRoute:Add, Checkbox, vCheckSkill3 Checked0 x145 y81, Skill 3
+    Gui, StartRoute:Add, Checkbox, vCheckSkill4 Checked0 x145 y100, Skill 4
+    Gui, StartRoute:Add, Checkbox, vCheckSkill5 Checked0 x145 y119, Skill 5
+    Gui, StartRoute:Add, Checkbox, vCheckSkill6 Checked0 x145 y138, Skill 6
+    Gui, StartRoute:Add, Checkbox, vCheckSkill7 Checked0 x145 y157, Skill 7
+    Gui, StartRoute:Add, Checkbox, vCheckSkill8 Checked0 x145 y176, Skill 8
+    Gui, StartRoute:Add, Checkbox, vCheckSkill9 Checked0 x145 y195, Skill 9
+    Gui, StartRoute:Add, Checkbox, vCheckSkill10 Checked0 x145 y214, Skill 10
     Gui, StartRoute:Add, Checkbox, vCheckRevive Checked0 x10 y105, Use Revive?
-    Gui, StartRoute:Add, Button, x10 y370 w180 gStartRoute, Start Route
+    Gui, StartRoute:Add, Checkbox, vCheckDefenseCd Checked0 x10 y124, Use Defense Skill?
+    Gui, StartRoute:Add, DropDownList, vDefenseSkill x10 y143, 1|2|3|4|5|6|7|8|9|10
+    ; Gui, StartRoute:Add, Edit, Limit32 vCDOrder c000000 x10 y170 w120, Skill Order
+    Gui, StartRoute:Add, Button, x10 y370 w180 gASDSeilaMermao, Start Route
     Gui, StartRoute:Show, x%border1X% y%border1Y% w200 h400, `t
+
+    goto, LoopOrderCD
+
+return
+
+LoopOrderCD:
+
+Loop {
+    if (STOP) {
+        return
+    }
+
+    if (startRoute) {
+        break
+    }
+
+    Gui, StartRoute:Submit, NoHide
+
+    i := 1
+    While (i <= 10) {
+        if (CheckSkill%i% = 1) {
+            a := loopParseMatch(i, CDOrder)
+            if (a = 0) {
+                CDOrder = %CDOrder%%i%,
+            }
+            ToolTip, %a% %CDOrder%
+        }
+
+        i++
+    }
+    
+}
+
+goto, StartRoute
 
 return
 
@@ -958,33 +1018,18 @@ return
 
 Test:
 
-    ; collectLoot(centerX, centerY)
+    ; Click, %centerX%, %centerY%
 
-    ; Loop {
-    ;     MouseGetPos, X, Y
-    ;     posX := calcCoord_X(X)
-    ;     posY := calcCoord_Y(Y)
+    ; ToolTip, a
+    ; sleep, 2000
+    ; ToolTip
 
-    ;     ToolTip, %posX% %posY%
-    ;     ; sleep, 100
-    ; }
+    ; useSkills("6 7 5 8")
 
-    ; ToolTip, %posX%
-
-    getPlayerCoord()
-    a := playerCoord[0]
-    b := playerCoord[1]
-    b := calcScreenCoordByCoordX(a - 2)
-    ToolTip, %a% %b% , battleMenuX, battleMenuY
-
-    sleep, 400
-
-    Click, %centerX%, %centerY%
-    sleep, 100
-
-    ;useSkills(0,0,0,0,0,1,0,1,0,0)
-
-    ;ToolTip 
+    a := "a,b,0,d,e,0,f"
+    b := 1
+    c := ReadMemory(SKILL_2 + 0x2C0, "UFloat")
+    ToolTip, a %c%
 
 return
 
@@ -1058,7 +1103,7 @@ Fish:
 
     sleep, 3000
 
-    collectLoot(centerX, centerY, 250)
+    collectLoot(centerX, centerY, 1, 250)
 
     FishLoop:
         ImageSearch, sR, Rs, a, b, c, d, *110 *Trans0x0000FF HBITMAP:*%imgHandle1%
@@ -1081,11 +1126,17 @@ return
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
-; Numpad5::
+Numpad4::
 
-;     collectLoot(centerX, centerY)
+    collectLoot(centerX, centerY)
 
-;     return
+return
+
+Numpad5::
+
+    useRevive()
+
+return
 
 ^Space::
 
