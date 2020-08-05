@@ -14,21 +14,8 @@ SetFormat, Integer, hex
 BASE_ADDRESS := ReadMemory(BASE_ADDRESS)
 SetFormat, Integer, d
 
-global BATTLE_BASE_ADDRESS := 0x007C5CC0
-SetFormat, Integer, hex
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x4)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x1C)
-BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
-SetFormat, Integer, d
-
 global skillX, skillY
-global pokeMenuX, pokeMenuY
+global pokeMenuX, pokeMenuY, battleMenuX, battleMenuY
 global maxX, maxY
 global divX, divY, playerX, playerY, centerX, centerY
 global imgHandle, imgHandle1, imgHandle2
@@ -49,131 +36,150 @@ Gui, Main:Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
 Gui, Main:Add, StatusBar,, Idle
 Gui, Main:Show, x1 y550 w190 h320, `t
 
-; Skills Offsets
-; -------------------------------------------------------------------------------------------------------------------------------------
-
-global SKILL_1 := 0x007C5CC0
-SetFormat, Integer, hex
-SKILL_1 := ReadMemory(SKILL_1)
-SKILL_1 := ReadMemory(SKILL_1 + 0x9C)
-SKILL_1 := ReadMemory(SKILL_1 + 0x60)
-SKILL_1 := ReadMemory(SKILL_1 + 0x0)
-SKILL_1 := ReadMemory(SKILL_1 + 0x28)
-SKILL_1 := ReadMemory(SKILL_1 + 0x54)
-SKILL_1 := ReadMemory(SKILL_1 + 0x0)
-SKILL_1 := ReadMemory(SKILL_1 + 0x9C)
-
-global SKILL_2 := 0x007C5CC0
-SKILL_2 := ReadMemory(SKILL_2)
-SKILL_2 := ReadMemory(SKILL_2 + 0x9C)
-SKILL_2 := ReadMemory(SKILL_2 + 0x54)
-SKILL_2 := ReadMemory(SKILL_2 + 0x28)
-SKILL_2 := ReadMemory(SKILL_2 + 0x54)
-SKILL_2 := ReadMemory(SKILL_2 + 0x4)
-SKILL_2 := ReadMemory(SKILL_2 + 0x54)
-SKILL_2 := ReadMemory(SKILL_2 + 0x0)
-
-global SKILL_3 := 0x007C5CC0
-SKILL_3 := ReadMemory(SKILL_3)
-SKILL_3 := ReadMemory(SKILL_3 + 0x9C)
-SKILL_3 := ReadMemory(SKILL_3 + 0x60)
-SKILL_3 := ReadMemory(SKILL_3 + 0x0)
-SKILL_3 := ReadMemory(SKILL_3 + 0x28)
-SKILL_3 := ReadMemory(SKILL_3 + 0x54)
-SKILL_3 := ReadMemory(SKILL_3 + 0x8)
-SKILL_3 := ReadMemory(SKILL_3 + 0x9C)
-
-global SKILL_4 := 0x007C5CC0
-SKILL_4 := ReadMemory(SKILL_4)
-SKILL_4 := ReadMemory(SKILL_4 + 0x9C)
-SKILL_4 := ReadMemory(SKILL_4 + 0x54)
-SKILL_4 := ReadMemory(SKILL_4 + 0x28)
-SKILL_4 := ReadMemory(SKILL_4 + 0x54)
-SKILL_4 := ReadMemory(SKILL_4 + 0xC)
-SKILL_4 := ReadMemory(SKILL_4 + 0x54)
-SKILL_4 := ReadMemory(SKILL_4 + 0x0)
-
-global SKILL_5 := 0x007C5CC0
-SKILL_5 := ReadMemory(SKILL_5)
-SKILL_5 := ReadMemory(SKILL_5 + 0x54)
-SKILL_5 := ReadMemory(SKILL_5 + 0x0)
-SKILL_5 := ReadMemory(SKILL_5 + 0x60)
-SKILL_5 := ReadMemory(SKILL_5 + 0x0)
-SKILL_5 := ReadMemory(SKILL_5 + 0x28)
-SKILL_5 := ReadMemory(SKILL_5 + 0x54)
-SKILL_5 := ReadMemory(SKILL_5 + 0x10)
-SKILL_5 := ReadMemory(SKILL_5 + 0x9C)
-
-global SKILL_6 := 0x007C5CC0
-SKILL_6 := ReadMemory(SKILL_6)
-SKILL_6 := ReadMemory(SKILL_6 + 0x9C)
-SKILL_6 := ReadMemory(SKILL_6 + 0x54)
-SKILL_6 := ReadMemory(SKILL_6 + 0x28)
-SKILL_6 := ReadMemory(SKILL_6 + 0x54)
-SKILL_6 := ReadMemory(SKILL_6 + 0x14)
-SKILL_6 := ReadMemory(SKILL_6 + 0x60)
-SKILL_6 := ReadMemory(SKILL_6 + 0x0)
-SKILL_6 := ReadMemory(SKILL_6 + 0x0)
-
-global SKILL_7 := 0x007C5CC0
-SKILL_7 := ReadMemory(SKILL_7)
-SKILL_7 := ReadMemory(SKILL_7 + 0x9C)
-SKILL_7 := ReadMemory(SKILL_7 + 0x60)
-SKILL_7 := ReadMemory(SKILL_7 + 0x0)
-SKILL_7 := ReadMemory(SKILL_7 + 0x28)
-SKILL_7 := ReadMemory(SKILL_7 + 0x54)
-SKILL_7 := ReadMemory(SKILL_7 + 0x18)
-SKILL_7 := ReadMemory(SKILL_7 + 0x54)
-SKILL_7 := ReadMemory(SKILL_7 + 0x0)
-
-global SKILL_8 := 0x007C5CC0
-SKILL_8 := ReadMemory(SKILL_8)
-SKILL_8 := ReadMemory(SKILL_8 + 0x9C)
-SKILL_8 := ReadMemory(SKILL_8 + 0x54)
-SKILL_8 := ReadMemory(SKILL_8 + 0x28)
-SKILL_8 := ReadMemory(SKILL_8 + 0x54)
-SKILL_8 := ReadMemory(SKILL_8 + 0x1C)
-SKILL_8 := ReadMemory(SKILL_8 + 0x44)
-SKILL_8 := ReadMemory(SKILL_8 + 0x14)
-SKILL_8 := ReadMemory(SKILL_8 + 0x9C)
-
-global SKILL_9 := 0x007C5CC0
-SKILL_9 := ReadMemory(SKILL_9)
-SKILL_9 := ReadMemory(SKILL_9 + 0x9C)
-SKILL_9 := ReadMemory(SKILL_9 + 0x54)
-SKILL_9 := ReadMemory(SKILL_9 + 0x28)
-SKILL_9 := ReadMemory(SKILL_9 + 0x54)
-SKILL_9 := ReadMemory(SKILL_9 + 0x20)
-SKILL_9 := ReadMemory(SKILL_9 + 0x60)
-SKILL_9 := ReadMemory(SKILL_9 + 0x0)
-SKILL_9 := ReadMemory(SKILL_9 + 0x0)
-
-global SKILL_10 := 0x007C5CC0
-SKILL_10 := ReadMemory(SKILL_10)
-SKILL_10 := ReadMemory(SKILL_10 + 0x9C)
-SKILL_10 := ReadMemory(SKILL_10 + 0x60)
-SKILL_10 := ReadMemory(SKILL_10 + 0x0)
-SKILL_10 := ReadMemory(SKILL_10 + 0x28)
-SKILL_10 := ReadMemory(SKILL_10 + 0x54)
-SKILL_10 := ReadMemory(SKILL_10 + 0x24)
-SKILL_10 := ReadMemory(SKILL_10 + 0x54)
-SKILL_10 := ReadMemory(SKILL_10 + 0x0)
-
-global IS_ON_BATTLE := 0x007C5820
-IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE)
-IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x124)
-IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x0)
-IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x1C)
-
-SetFormat, Integer, d
-
 return
-
-; -------------------------------------------------------------------------------------------------------------------------------------
 
 ; Functions
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
+
+updateOffsets() {
+
+    global SKILL_1 := 0x007C4CC0
+    global SKILL_2 := 0x007C4CC0
+    global SKILL_3 := 0x007C4CC0
+    global SKILL_4 := 0x007C4CC0
+    global SKILL_5 := 0x007C4CC0
+    global SKILL_6 := 0x007C4CC0
+    global SKILL_7 := 0x007C4CC0
+    global SKILL_8 := 0x007C4CC0
+    global SKILL_9 := 0x007C4CC0
+    global SKILL_10 := 0x007C4CC0
+    global IS_ON_BATTLE := 0x007C5820
+    global BATTLE_BASE_ADDRESS := 0x007C5CC0
+
+    SetFormat, Integer, hex
+
+    SKILL_1 := ReadMemory(SKILL_1)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x9C)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x44)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x14)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x54)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x28)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x54)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x0)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x68)
+    SKILL_1 := ReadMemory(SKILL_1 + 0x0)
+
+    SKILL_2 := ReadMemory(SKILL_2)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x54)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x0)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x60)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x0)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x28)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x54)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x4)
+    SKILL_2 := ReadMemory(SKILL_2 + 0x9C)
+
+    SKILL_3 := ReadMemory(SKILL_3)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x9C)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x54)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x28)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x54)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x8)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x60)
+    SKILL_3 := ReadMemory(SKILL_3 + 0x0)
+    SKILL_3 := ReadMemory(SKILL_3+ 0x0)
+
+    SKILL_4 := ReadMemory(SKILL_4)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x9C)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x54)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x28)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x54)
+    SKILL_4 := ReadMemory(SKILL_4 + 0xC)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x60)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x0)
+    SKILL_4 := ReadMemory(SKILL_4 + 0x0)
+
+    SKILL_5 := ReadMemory(SKILL_5)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x9C)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x60)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x0)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x28)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x54)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x10)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x58)
+    SKILL_5 := ReadMemory(SKILL_5 + 0x0)
+
+    SKILL_6 := ReadMemory(SKILL_6)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x9C)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x54)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x28)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x54)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x14)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x44)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x14)
+    SKILL_6 := ReadMemory(SKILL_6 + 0x9C)
+
+    SKILL_7 := ReadMemory(SKILL_7)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x9C)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x54)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x28)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x54)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x18)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x60)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x0)
+    SKILL_7 := ReadMemory(SKILL_7 + 0x0)
+
+    SKILL_8 := ReadMemory(SKILL_8)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x54)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x0)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x60)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x0)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x28)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x54)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x1C)
+    SKILL_8 := ReadMemory(SKILL_8 + 0x9C)
+
+    SKILL_9 := ReadMemory(SKILL_9)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x9C)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x44)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x14)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x54)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x28)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x54)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x20)
+    SKILL_9 := ReadMemory(SKILL_9 + 0x9C)
+
+    SKILL_10 := ReadMemory(SKILL_10)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x9C)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x44)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x14)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x54)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x28)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x54)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x24)
+    SKILL_10 := ReadMemory(SKILL_10 + 0x9C)
+
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x124)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x0)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x1C)
+
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x1C)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
+
+    SetFormat, Integer, d
+
+    return
+
+}
 
 calcSQM_X(posX) {
 
@@ -420,7 +426,7 @@ findRouteName(name) {
 getBattleElements() {
 
     battleElements := ReadMemory(BATTLE_BASE_ADDRESS + 0x30)
-    battleElements -= 308
+    battleElements -= 318
     battleElements := Round(battleElements / 25)
 
     return battleElements
@@ -483,7 +489,20 @@ ReadMemory(address, type := "UInt") {
 
 }
 
-useRevive() {
+useMedicine() {
+
+    BlockInput, MouseMove
+    MouseGetPos, X, Y
+    MouseMove, battleMenuX + 15, battleMenuY + 35
+    sleep, 40
+    Send {XButton1}
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+
+    return
+}
+
+useRevive(defense := 0) {
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
 
@@ -524,23 +543,36 @@ useRevive() {
     Ok1:
     MouseMove, X, Y
     BlockInput, MouseMoveOff
+
+    if (defense = 1) {
+        Send ^{0}
+    }
+
+    return
 }
 
-useSkills(cds := "") {
+useSkills(cds := "", stop := 0) {
 
-    StartCD:
+    updateOffsets()
+    sleep, 200
+    updateOffsets()
 
-    Loop, Parse, cds, `,
+    if (stop = 1) {
+        Send ^{8}
+    }
+
+    Send ^{9}
+
+    Loop, Parse, cds, >
     {
-        SetFormat, Integer, hex
         if (A_LoopField != "") {
             Loop {
                 Send {F%A_LoopField%}
-                if ReadMemory(SKILL_%A_LoopField% + 0x2C0, "UFloat") != 100
+                if (ReadMemory(SKILL_%A_LoopField% + 0x2C0, "UFloat") != 100) {
                     break
+                }
             }
         }
-        SetFormat, Integer, d
     }
 
     return
@@ -880,6 +912,8 @@ StartRoute:
             return
         }
 
+        Send ^{0}
+
         Loop {
             playerX := ReadMemory(BASE_ADDRESS + 0xC)
             playerY := ReadMemory(BASE_ADDRESS + 0x10)
@@ -901,7 +935,7 @@ StartRoute:
             }
         }
 
-        if (isOnBattle() AND EnableDefense AND getBattleElements() >= 3) {
+        if (isOnBattle() AND EnableDefense AND getBattleElements() >= 2) {
             useSkills(DefenseSkill)
             EnableDefense := 0
         }
@@ -924,12 +958,15 @@ StartRoute:
 
             sleep, 4000
 
+            Send ^{9}
+
             useSkills(CDOrder)
 
             Loop {
                 if (isOnBattle()) {
 
                 } else {
+                    Send ^{0}
                     break
                 }
             }
@@ -1028,18 +1065,25 @@ return
 
 Test:
 
-    ; Click, %centerX%, %centerY%
+    Click, %centerX%, %centerY%
+    sleep, 1000
 
-    ; ToolTip, a
-    ; sleep, 2000
-    ; ToolTip
+    ; useSkills("6,5,3,8,7")
 
-    ; useSkills("6 7 5 8")
+    updateOffsets()
 
-    a := "a,b,0,d,e,0,f"
-    b := 1
-    c := ReadMemory(SKILL_2 + 0x2C0, "UFloat")
-    ToolTip, a %c%
+    a := ReadMemory(SKILL_1 + 0x2C0, "UFloat")
+    b := ReadMemory(SKILL_2 + 0x2C0, "UFloat")
+    c := ReadMemory(SKILL_3 + 0x2C0, "UFloat")
+    d := ReadMemory(SKILL_4 + 0x2C0, "UFloat")
+    e := ReadMemory(SKILL_5 + 0x2C0, "UFloat")
+    f := ReadMemory(SKILL_6 + 0x2C0, "UFloat")
+    g := ReadMemory(SKILL_7 + 0x2C0, "UFloat")
+    h := ReadMemory(SKILL_8 + 0x2C0, "UFloat")
+    i := ReadMemory(SKILL_9 + 0x2C0, "UFloat")
+    j := ReadMemory(SKILL_10 + 0x2C0, "UFloat")
+
+    ToolTip, a %a%`n%b%`n%c%`n%d%`n%e%`n%f%`n%g%`n%h%`n%i%`n%j%
 
 return
 
@@ -1136,15 +1180,34 @@ return
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
+Numpad1::
+
+    useSkills("10")
+
+return
+
+Numpad2::
+
+    useMedicine()
+
+return
+
 Numpad4::
 
-    collectLoot(centerX, centerY)
+    
+    useSkills("6>7>5>8>4>9", 1)
 
 return
 
 Numpad5::
 
-    useRevive()
+    collectLoot(centerX, centerY)
+
+return
+
+Numpad6::
+
+    useRevive(1)
 
 return
 
