@@ -9,7 +9,7 @@ CoordMode, Mouse, Screen
 SetMouseDelay, 15
 firstTimeConfigure := 0
 
-global BASE_ADDRESS := 0x007C6320
+global BASE_ADDRESS := 0x007C5328
 SetFormat, Integer, hex
 BASE_ADDRESS := ReadMemory(BASE_ADDRESS)
 SetFormat, Integer, d
@@ -55,7 +55,7 @@ updateOffsets() {
     global SKILL_9 := 0x007C4CC0
     global SKILL_10 := 0x007C4CC0
     global IS_ON_BATTLE := 0x007C5820
-    global BATTLE_BASE_ADDRESS := 0x007C5CC0
+    global BATTLE_BASE_ADDRESS := 0x007C4CC0
 
     SetFormat, Integer, hex
 
@@ -167,11 +167,11 @@ updateOffsets() {
 
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
-    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
-    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x8)
-    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x54)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x4)
+    BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x58)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x1C)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
 
@@ -489,6 +489,33 @@ ReadMemory(address, type := "UInt") {
 
 }
 
+validateSkills(skillCount := 10) {
+
+    i := skillCount
+    a := 0
+
+    if (skillCount = 0) {
+        return 1
+    }
+
+    updateOffsets()
+
+    While (i > 0) {
+        if (ReadMemory(SKILL_%i% + 0x2C0, "UFloat") != 100) {
+            a++
+        }
+
+        i--
+    }
+
+    if (a < 2) {
+        return 0
+    } else {
+        return 1
+    }
+
+}
+
 useMedicine() {
 
     BlockInput, MouseMove
@@ -502,9 +529,13 @@ useMedicine() {
     return
 }
 
-useRevive(defense := 0) {
+useRevive(defense := 0, skills := 0) {
+
+    SetBatchLines, -1
+
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
+    a := 10
 
     imgHandle1 := LoadPicture("imagesNew/max.png")
 
@@ -523,30 +554,43 @@ useRevive(defense := 0) {
         sleep, 20
     }
 
-    Rev1:
+    Rev:
 
     Send {XButton2}
 	ImageSearch, Rs, Sr, maxX - 10, maxY, maxX + 35, maxY + 9, *Trans0x0000FF HBITMAP:*%imgHandle1%
 	if ErrorLevel = 1
-		goto,  Rev1
+		goto,  Rev
 
     imgHandle2 := LoadPicture("imagesNew/revOut.png")
 
+    TakePokeOut:
+
 	Loop {
 		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF HBITMAP:*%imgHandle2%
-		if ErrorLevel = 1 
+		if ErrorLevel = 1
 			Click, right
 		else
-			goto, Ok1
+			break
 	}
 
-    Ok1:
-    MouseMove, X, Y
-    BlockInput, MouseMoveOff
+    if (skills AND validateSkills(a)) {
+        if (a = 0) {
+            skills := 0
+            goto, TakePokeOut
+        }
+        sleep, 400
+        a--
+        Click, right
+        sleep, 250
+        goto, TakePokeOut
+    }
 
-    if (defense = 1) {
+    if (defense) {
         Send ^{0}
     }
+
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
 
     return
 }
@@ -554,13 +598,12 @@ useRevive(defense := 0) {
 useSkills(cds := "", stop := 0) {
 
     updateOffsets()
-    sleep, 200
-    updateOffsets()
 
     if (stop = 1) {
         Send ^{8}
     }
 
+    Send ^{Up}
     Send ^{9}
 
     Loop, Parse, cds, >
@@ -671,7 +714,7 @@ Configure:
     MouseClick,,,, 2
     MouseMove, a + 33, b - 15
     sleep, 100
-    MouseClick,,,, 3
+    MouseClick,,,, 1
     sleep, 100
     MouseMove, a, b  
     sleep, 100
@@ -1059,7 +1102,7 @@ return
 
 UseRevive:
 
-    useRevive()
+    useRevive(1, 1)
 
 return
 
@@ -1070,20 +1113,9 @@ Test:
 
     ; useSkills("6,5,3,8,7")
 
-    updateOffsets()
+    a := validateSkills(10)
 
-    a := ReadMemory(SKILL_1 + 0x2C0, "UFloat")
-    b := ReadMemory(SKILL_2 + 0x2C0, "UFloat")
-    c := ReadMemory(SKILL_3 + 0x2C0, "UFloat")
-    d := ReadMemory(SKILL_4 + 0x2C0, "UFloat")
-    e := ReadMemory(SKILL_5 + 0x2C0, "UFloat")
-    f := ReadMemory(SKILL_6 + 0x2C0, "UFloat")
-    g := ReadMemory(SKILL_7 + 0x2C0, "UFloat")
-    h := ReadMemory(SKILL_8 + 0x2C0, "UFloat")
-    i := ReadMemory(SKILL_9 + 0x2C0, "UFloat")
-    j := ReadMemory(SKILL_10 + 0x2C0, "UFloat")
-
-    ToolTip, a %a%`n%b%`n%c%`n%d%`n%e%`n%f%`n%g%`n%h%`n%i%`n%j%
+    ToolTip, a %a%
 
 return
 
@@ -1195,7 +1227,7 @@ return
 Numpad4::
 
     
-    useSkills("6>7>5>8>4>9", 1)
+    useSkills("6>7>8>5>4>9", 1)
 
 return
 
@@ -1207,7 +1239,7 @@ return
 
 Numpad6::
 
-    useRevive(1)
+    useRevive(1, 1)
 
 return
 
