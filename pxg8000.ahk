@@ -8,6 +8,7 @@ CoordMode, ToolTip, Screen
 CoordMode, Mouse, Screen
 SetMouseDelay, 15
 firstTimeConfigure := 0
+BlockInput, MouseMoveOff
 
 global BASE_ADDRESS := 0x007C5328
 SetFormat, Integer, hex
@@ -664,7 +665,7 @@ Configure:
     sleep, 40
     MouseMove, border1X + 100, border1Y + 100
     sleep, 25
-    MouseMove, padraoX, border1Y + 700
+    MouseMove, padraoX, border1Y + 850
     sleep, 40
     Click, up
     MouseMove, X, Y
@@ -780,7 +781,7 @@ Configure:
 
     sleep, 500
 
-    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/skillMenu.png
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *20 *Trans0x0000FF ./imagesNew/skillMenu.png
     if (ErrorLevel = 1) {
         BlockInput, MouseMove
         MouseMove, pokeMenuX + 20, pokeMenuY + 75
@@ -804,7 +805,7 @@ Configure:
     sleep, 40
     MouseMove, X, Y
     sleep, 40
-    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/skillMenu.png
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *20 *Trans0x0000FF ./imagesNew/skillMenu.png
     if ErrorLevel = 1
         goto, FindSkillMenu
     skillX -= 18
@@ -822,9 +823,11 @@ Configure:
     ;ToolTip, Use a revive to configure, pokeMenuX, pokeMenuY - 30
     MsgBox Use a revive to configure
 
+    imgHandle1 := LoadPicture("imagesNew/max.png")
+
     ConfigRevive:
 
-    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/max.png
+    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *30 *Trans0x0000FF HBITMAP:*%imgHandle1%
     if ErrorLevel = 1
         goto, ConfigRevive
     
