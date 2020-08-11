@@ -27,6 +27,7 @@ global STOP
 global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill
 global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10
 global CDOrder
+global BATTLE_BASE_ADDRESS
 
 Gui, Main:New, +AlwaysOnTop
 Gui, Main:Color, 0x353535
@@ -56,7 +57,7 @@ updateOffsets() {
     global SKILL_9 := 0x007C4CC0
     global SKILL_10 := 0x007C4CC0
     global IS_ON_BATTLE := 0x007C5820
-    global BATTLE_BASE_ADDRESS := 0x007C4CC0
+    BATTLE_BASE_ADDRESS := 0x007C4CC0
 
     SetFormat, Integer, hex
 
@@ -425,6 +426,8 @@ findRouteName(name) {
 
 getBattleElements() {
 
+    updateOffsets()
+
     battleElements := ReadMemory(BATTLE_BASE_ADDRESS + 0x30)
     battleElements -= 318
     battleElements := Round(battleElements / 25)
@@ -529,9 +532,28 @@ useMedicine() {
     return
 }
 
-useRevive(defense := 0, skills := 0) {
+useRevive(defense := 0, skills := 0, safeMode := 0) {
 
     SetBatchLines, -1
+
+    pokeHealth := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
+    if (pokeHealth > 40 AND getBattleElements() > 1 AND safeMode = 1) {
+        ToolTip, Death risk detected`, press again to use revive, border1X, border1Y
+        sleep, 600
+        a := 0
+        Loop, 100 {
+            sleep, 25
+            if (GetKeyState("Numpad6", "P")) {
+                ToolTip
+                a := 1
+                break
+            }
+        }
+        if (a = 0) {
+            ToolTip
+            return
+        }
+    }
 
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
@@ -639,7 +661,7 @@ Configure:
     ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-    border1Y += 12
+    border1Y += 1
 
     SB_SetText("Adjusting Screen Scale")
 
@@ -650,16 +672,16 @@ Configure:
         ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./imagesNew/padraoLit.png
         if ErrorLevel = 1
             goto, AdjustScreenScale
-    }    
+    }
         
     Sleep, 1000
 
-    padraoY -= 4 
-    BlockInput, MouseMove 
+    padraoY -= 4
+    BlockInput, MouseMove
     MouseMove padraoX, border1Y + 100
-    sleep, 40  
+    sleep, 40
     MouseGetPos, X, Y
-    MouseMove, padraoX, padraoY  
+    MouseMove, padraoX, padraoY
     sleep, 40
     Click, down
     sleep, 40
@@ -669,26 +691,26 @@ Configure:
     sleep, 40
     Click, up
     MouseMove, X, Y
-    ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder1.png
+    ImageSearch, border1X, border1Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder1.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-    border1X += 18
-    border1Y += 9
-    ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder2.png
+    border1X += 2
+    border1Y += 2
+    ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder2.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-    border2X += 21
-    border2Y += 6
-    ImageSearch, border3X, border3Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder3.png
+    border2X += 49
+    border2Y += 2
+    ImageSearch, border3X, border3Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder3.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-    border3X += 25
-    border3Y += 4
-    ImageSearch, border4X, border4Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *Trans0x0000FF ./imagesNew/screenBorder4.png
+    border3X += 2
+    border3Y += 49
+    ImageSearch, border4X, border4Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder4.png
     if ErrorLevel = 1
         goto, FindScreenBorder
-    border4X += 26
-    border4Y += 7
+    border4X += 49
+    border4Y += 49
     BlockInput, MouseMoveOff
 
     SB_SetText("Adjusting Minimap")
@@ -827,7 +849,7 @@ Configure:
 
     ConfigRevive:
 
-    ImageSearch, maxX, maxY, 0, 0, A_ScreenWidth, A_ScreenHeight, *30 *Trans0x0000FF HBITMAP:*%imgHandle1%
+    ImageSearch, maxX, maxY, padraoX, padraoY - 30, padraoX + 1100, padraoY + 10, *30 *Trans0x0000FF HBITMAP:*%imgHandle1%
     if ErrorLevel = 1
         goto, ConfigRevive
     
@@ -839,6 +861,7 @@ Configure:
     IniWrite, %maxY%, config.ini, vars, maxY
 
     endConfig:
+        updateOffsets()
         divX := (border2X - border1X) / 15
         divY := (border3Y - border1Y) / 11
         centerX := ((border2X - border1X) / 2) + border1X 
@@ -1115,9 +1138,12 @@ Test:
 
     ; useSkills("6,5,3,8,7")
 
-    a := validateSkills(10)
+    updateOffsets()
 
-    ToolTip, a %a%
+    a := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
+    b := getBattleElements()
+
+    ToolTip, a %a% %b%
 
 return
 
@@ -1241,7 +1267,7 @@ return
 
 Numpad6::
 
-    useRevive(1, 1)
+    useRevive(1, 1, 1)
 
 return
 
