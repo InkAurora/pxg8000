@@ -1,3 +1,4 @@
+#include <CGdipSnapshot>
 #NoEnv  
 #SingleInstance, force
 ; #Warn  
@@ -8,7 +9,10 @@ CoordMode, ToolTip, Screen
 CoordMode, Mouse, Screen
 SetMouseDelay, 15
 firstTimeConfigure := 0
+BlockInput, MouseMove
 BlockInput, MouseMoveOff
+BlockInput, Send
+ListLines Off
 
 global BASE_ADDRESS := 0x007C5328
 SetFormat, Integer, hex
@@ -24,10 +28,12 @@ global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, bor
 global playerCoord := []
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
-global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill
+global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill, BushName, BushLaps, Logout
 global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10
 global CDOrder
 global BATTLE_BASE_ADDRESS
+global IS_ON_BATTLE
+global POKE_IS_OUT
 
 Gui, Main:New, +AlwaysOnTop
 Gui, Main:Color, 0x353535
@@ -56,8 +62,9 @@ updateOffsets() {
     global SKILL_8 := 0x007C4CC0
     global SKILL_9 := 0x007C4CC0
     global SKILL_10 := 0x007C4CC0
-    global IS_ON_BATTLE := 0x007C5820
     BATTLE_BASE_ADDRESS := 0x007C4CC0
+    IS_ON_BATTLE := 0x007C4820
+    POKE_IS_OUT := 0x007C4CC0
 
     SetFormat, Integer, hex
 
@@ -161,11 +168,6 @@ updateOffsets() {
     SKILL_10 := ReadMemory(SKILL_10 + 0x58)
     SKILL_10 := ReadMemory(SKILL_10 + 0x0)
 
-    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE)
-    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x124)
-    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x0)
-    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x1C)
-
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x68)
@@ -175,6 +177,16 @@ updateOffsets() {
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x58)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x1C)
     BATTLE_BASE_ADDRESS := ReadMemory(BATTLE_BASE_ADDRESS + 0x9C)
+
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x124)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x0)
+    IS_ON_BATTLE := ReadMemory(IS_ON_BATTLE + 0x1C)
+    
+    POKE_IS_OUT := ReadMemory(POKE_IS_OUT)
+    POKE_IS_OUT := ReadMemory(POKE_IS_OUT + 0x9C)
+    POKE_IS_OUT := ReadMemory(POKE_IS_OUT + 0x54)
+    POKE_IS_OUT := ReadMemory(POKE_IS_OUT + 0x28)
 
     SetFormat, Integer, d
 
@@ -304,7 +316,7 @@ collectLoot(X, Y, mode = 1, delay = 50) {
             Rs := playerCoord[0]
             Sr := playerCoord[1]
             if (Rs = X AND Sr = Y) {
-                sleep, 2500
+                sleep, 500
                 break
             }
         }
@@ -408,19 +420,9 @@ collectLoot(X, Y, mode = 1, delay = 50) {
 
 }
 
-findPokemonPosition() {
-
-    ImageSearch, a, b, border1X, border1Y, border4X, border4Y, *Trans0x0000FF lifeBar2.png
-    if ErrorLevel = 0
-        ToolTip
+findPath() {
 
     
-
-}
-
-findRouteName(name) {
-
-
 
 }
 
@@ -447,6 +449,8 @@ getPlayerCoord() {
 
 isOnBattle() {
 
+    updateOffsets()
+
     a := ReadMemory(IS_ON_BATTLE + 0x4)
     if (a = 1) {
         return 0
@@ -457,13 +461,34 @@ isOnBattle() {
 }
 
 loopParseMatch(var, match) {
-    Loop, parse, match, `,
+    Loop, parse, match, >
     {
         if var = %A_LoopField%
             return 1
     }
 
     return 0
+}
+
+pokeIsOut() {
+
+    updateOffsets()
+
+    a := ReadMemory(POKE_IS_OUT + 0x3C)
+    if (a = 1) {
+        return 0
+    } else if (a = 257) {
+        return 1
+    }
+
+}
+
+QPX( N=0 ) { ; Wrapper for QueryPerformanceCounter()by SKAN | CD: 06/Dec/2009
+	Static F,A,Q,P,X ; www.autohotkey.com/forum/viewtopic.php?t=52083 | LM: 10/Dec/2009
+	If	( N && !P )
+		Return	DllCall("QueryPerformanceFrequency",Int64P,F) + (X:=A:=0) + DllCall("QueryPerformanceCounter",Int64P,P)
+	DllCall("QueryPerformanceCounter",Int64P,Q), A:=A+Q-P, P:=Q, X:=X+1
+	Return	( N && X=N ) ? (X:=X-1)<<64 : ( N=0 && (R:=A/X/F) ) ? ( R + (A:=P:=X:=0) ) : 1
 }
 
 ReadMemory(address, type := "UInt") {
@@ -494,27 +519,27 @@ ReadMemory(address, type := "UInt") {
 
 validateSkills(skillCount := 10) {
 
-    i := skillCount
+    i := 1
     a := 0
 
     if (skillCount = 0) {
-        return 1
+        return 0
     }
 
     updateOffsets()
 
-    While (i > 0) {
+    While (i <= skillCount) {
         if (ReadMemory(SKILL_%i% + 0x2C0, "UFloat") != 100) {
             a++
         }
 
-        i--
+        i++
     }
 
-    if (a < 2) {
+    if (a = 0) {
         return 0
     } else {
-        return 1
+        return a
     }
 
 }
@@ -537,7 +562,7 @@ useRevive(defense := 0, skills := 0, safeMode := 0) {
     SetBatchLines, -1
 
     pokeHealth := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
-    if (pokeHealth > 40 AND getBattleElements() > 1 AND safeMode = 1) {
+    if (pokeHealth > 40 AND getBattleElements() > 1 AND safeMode = 1 AND isOnBattle()) {
         ToolTip, Death risk detected`, press again to use revive, border1X, border1Y
         sleep, 600
         a := 0
@@ -561,20 +586,21 @@ useRevive(defense := 0, skills := 0, safeMode := 0) {
 
     imgHandle1 := LoadPicture("imagesNew/max.png")
 
-    ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF ./imagesNew/revOut.png
-    if (ErrorLevel = 0) {
+    if (pokeIsOut() = 1) {
         BlockInput, MouseMove
         MouseGetPos, X, Y
 		MouseMove, RevX, RevY
 		sleep, 20
 		Click, right
     }
-    else if (ErrorLevel = 1) {
+    else if (pokeIsOut() = 0) {
         BlockInput, MouseMove
         MouseGetPos, X, Y
         MouseMove, RevX, RevY
         sleep, 20
     }
+
+    QPX(True)
 
     Rev:
 
@@ -588,14 +614,16 @@ useRevive(defense := 0, skills := 0, safeMode := 0) {
     TakePokeOut:
 
 	Loop {
-		ImageSearch, Rs, Sr, skillX + 18, skillY + 24, skillX + 32, skillY + 65, *Trans0x0000FF HBITMAP:*%imgHandle2%
-		if ErrorLevel = 1
+		if (pokeIsOut() = 0) {
 			Click, right
-		else
-			break
+        } else {
+		    break
+        }
 	}
 
-    if (skills AND validateSkills(a)) {
+    b := QPX(False)
+
+    if (skills AND validateSkills(a) > 1) {
         if (a = 0) {
             skills := 0
             goto, TakePokeOut
@@ -614,10 +642,98 @@ useRevive(defense := 0, skills := 0, safeMode := 0) {
     MouseMove, X, Y
     BlockInput, MouseMoveOff
 
+    ToolTip, %b%s
+
     return
 }
 
-useSkills(cds := "", stop := 0) {
+useReviveMem(defense := 0, skills := 0, safeMode := 0) {
+
+    SetBatchLines, -1
+
+    pokeHealth := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
+    if (pokeHealth > 20 AND getBattleElements() > 1 AND safeMode AND isOnBattle()) {
+        ToolTip, Death risk detected`, press again to use revive, border1X, border1Y
+        sleep, 600
+        a := 0
+        Loop, 100 {
+            sleep, 25
+            if (GetKeyState("Numpad6", "P")) {
+                ToolTip
+                a := 1
+                break
+            }
+        }
+        if (a = 0) {
+            ToolTip
+            return
+        }
+    }
+
+    RevX := pokeMenuX + 20
+    RevY := pokeMenuY + 75
+    a := 10
+
+    oldSnap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
+    Snap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
+
+    if (pokeIsOut() = 1) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+		MouseMove, RevX, RevY
+		sleep, 20
+		Click, right
+    }
+    else if (pokeIsOut() = 0) {
+        BlockInput, MouseMove
+        MouseGetPos, X, Y
+        MouseMove, RevX, RevY
+        sleep, 20
+    }
+
+    oldSnap.TakeSnapshot()
+
+    Loop {
+        Snap.TakeSnapshot()
+        if (oldSnap.Compare(Snap) = 0) {
+            break
+        }
+        Send {XButton2}
+    }
+
+    TakePokeOutMem:
+
+	Loop {
+		if (pokeIsOut() = 0) {
+			Click, right
+        } else {
+		    break
+        }
+	}
+
+    if (skills AND validateSkills(a) > 1) {
+        if (a = 0) {
+            skills := 0
+            goto, TakePokeOutMem
+        }
+        sleep, 400
+        a--
+        Click, right
+        sleep, 250
+        goto, TakePokeOutMem
+    }
+
+    if (defense) {
+        Send ^{0}
+    }
+
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+
+    return
+}
+
+useSkills(cds := "", stop := 0, offensive := 0) {
 
     updateOffsets()
 
@@ -626,7 +742,11 @@ useSkills(cds := "", stop := 0) {
     }
 
     Send ^{Up}
-    Send ^{9}
+    BlockInput, Default
+
+    if (offensive = 1) {
+        Send ^{9}
+    }
 
     Loop, Parse, cds, >
     {
@@ -696,21 +816,18 @@ Configure:
         goto, FindScreenBorder
     border1X += 2
     border1Y += 2
-    ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder2.png
+    ImageSearch, border2X, border2Y, 0, 0, A_ScreenWidth, border1Y + 60, *0 *Trans0x0000FF ./imagesNew/screenBorder2.png
     if ErrorLevel = 1
         goto, FindScreenBorder
     border2X += 49
     border2Y += 2
-    ImageSearch, border3X, border3Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder3.png
+    ImageSearch, border3X, border3Y, 0, 0, border1X + 60, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder3.png
     if ErrorLevel = 1
         goto, FindScreenBorder
     border3X += 2
     border3Y += 49
-    ImageSearch, border4X, border4Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *0 *Trans0x0000FF ./imagesNew/screenBorder4.png
-    if ErrorLevel = 1
-        goto, FindScreenBorder
-    border4X += 49
-    border4Y += 49
+    border4X := border2X
+    border4Y := border3Y
     BlockInput, MouseMoveOff
 
     SB_SetText("Adjusting Minimap")
@@ -873,6 +990,9 @@ Configure:
         Gui, Main:Add, Button, x100 y100 w80 h20 gStartRoutePrompt, Start Route
         Gui, Main:Add, GroupBox, x10 y130 w170 h1
         Gui, Main:Add, Button, x10 y145 w80 h20 gTest, Test
+        Gui, Main:Add, Button, x10 y175 w80 h20 gCfgBush, Config. Bush
+        Gui, Main:Add, Button, x100 y175 w80 h20 gStartBushPrompt, Collect Bushes
+        ; ToolTip, %border1X% %border1Y% %border2X% %border2Y% %border3X% %border3Y% %border4X% %border4Y%
 
 return
 
@@ -918,24 +1038,24 @@ ConfigureNewRoute:
 
     Loop {
 
-    sleep, 100
-    
-    playerX := ReadMemory(BASE_ADDRESS + 0xC)
-    playerY := ReadMemory(BASE_ADDRESS + 0x10)
+        sleep, 100
+        
+        playerX := ReadMemory(BASE_ADDRESS + 0xC)
+        playerY := ReadMemory(BASE_ADDRESS + 0x10)
 
-    if (playerX != oldCoordX OR playerY != oldCoordY) {
-        IniWrite, %playerX%, routes.rte, %RouteName%X, x%a%
-        IniWrite, %playerY%, routes.rte, %RouteName%Y, y%a%
-        a++
-        oldCoordX := playerX
-        oldCoordY := playerY
-    }
+        if (playerX != oldCoordX OR playerY != oldCoordY) {
+            IniWrite, %playerX%, routes.rte, %RouteName%X, x%a%
+            IniWrite, %playerY%, routes.rte, %RouteName%Y, y%a%
+            a++
+            oldCoordX := playerX
+            oldCoordY := playerY
+        }
 
-    if (STOP = 1) {
-        IniWrite, 0, routes.rte, %RouteName%X, x%a%
-        IniWrite, 0, routes.rte, %RouteName%Y, y%a%
-        break
-    }
+        if (STOP = 1) {
+            IniWrite, -10, routes.rte, %RouteName%X, x%a%
+            IniWrite, -10, routes.rte, %RouteName%Y, y%a%
+            break
+        }
 
     }
 
@@ -980,30 +1100,33 @@ StartRoute:
             return
         }
 
-        Send ^{0}
-
         Loop {
             playerX := ReadMemory(BASE_ADDRESS + 0xC)
             playerY := ReadMemory(BASE_ADDRESS + 0x10)
 
             if (playerX < targetX) {
-                Send {Right}
+                Send {Right down}
             } else if (playerX > targetX) {
-                Send {Left}
+                Send {Left down}
             }
 
             if (playerY < targetY) {
-                Send {Down}
+                Send {Down down}
             } else if (playerY > targetY) {
-                Send {Up}
+                Send {Up down}
             }
+
+            Send {Right up}
+            Send {Left up}
+            Send {Down up}
+            Send {Up up}
 
             if (playerX = targetX AND playerY = targetY) {
                 break
             }
         }
 
-        if (isOnBattle() AND EnableDefense AND getBattleElements() >= 2) {
+        if (isOnBattle() AND EnableDefense) {
             useSkills(DefenseSkill)
             EnableDefense := 0
         }
@@ -1026,15 +1149,12 @@ StartRoute:
 
             sleep, 4000
 
-            Send ^{9}
-
-            useSkills(CDOrder)
+            useSkills(CDOrder, 1, 1)
 
             Loop {
                 if (isOnBattle()) {
 
                 } else {
-                    Send ^{0}
                     break
                 }
             }
@@ -1044,7 +1164,7 @@ StartRoute:
             }
 
             if (CheckRevive = 1) {
-                useRevive()
+                useReviveMem(1, 1)
             }
 
             if (CheckDefenseCd) {
@@ -1111,9 +1231,8 @@ Loop {
         if (CheckSkill%i% = 1) {
             a := loopParseMatch(i, CDOrder)
             if (a = 0) {
-                CDOrder = %CDOrder%%i%,
+                CDOrder = %CDOrder%%i%>
             }
-            ToolTip, %a% %CDOrder%
         }
 
         i++
@@ -1127,7 +1246,7 @@ return
 
 UseRevive:
 
-    useRevive(1, 1)
+    useReviveMem(1, 1)
 
 return
 
@@ -1136,14 +1255,218 @@ Test:
     Click, %centerX%, %centerY%
     sleep, 1000
 
-    ; useSkills("6,5,3,8,7")
+    a := isOnBattle()
 
-    updateOffsets()
+    ToolTip, a %a% %pokeMenuX% %pokeMenuY%
 
-    a := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
-    b := getBattleElements()
+return
 
-    ToolTip, a %a% %b%
+CfgBush:
+
+    Gui, NewBush:New, +AlwaysOnTop
+    Gui, NewBush:Color, 0x353535
+    Gui, NewBush:Add, Edit, Limit32 vBushName x10 y10 w180, Route Name
+    Gui, NewBush:Add, Button, x10 y70 w180 gConfigureNewBush, Create New Route
+    Gui, NewBush:Show, x400 y400 w200 h100, `t
+
+return
+
+ConfigureNewBush:
+
+    a := 0
+    b := 0
+    oldCoordX := 0
+    oldCoordY := 0
+    STOP := 0
+
+    Gui, NewBush:Submit
+    if (STOP = 1 AND BushName != "") {
+        return
+    } else if (BushName = "") {
+        MsgBox Empty route name!
+        ToolTip
+        return
+    }
+
+    IniWrite, %BushName%, routes.rte, routes, %BushName%
+
+    STOP := 0
+
+    ToolTip, Recording new route`nPress Ctrl+Space to stop, border1X, border1Y - 40
+
+    Click, %centerX%, %centerY%
+
+    Loop {
+
+        sleep, 100
+        
+        playerX := ReadMemory(BASE_ADDRESS + 0xC)
+        playerY := ReadMemory(BASE_ADDRESS + 0x10)
+
+        if (playerX != oldCoordX OR playerY != oldCoordY) {
+            IniWrite, %playerX%, routes.rte, %BushName%X, x%a%
+            IniWrite, %playerY%, routes.rte, %BushName%Y, y%a%
+            a++
+            oldCoordX := playerX
+            oldCoordY := playerY
+        }
+
+        if (GetKeyState("End", "P")) {
+            Loop {
+                if (GetKeyState("LButton", "P")) {
+                    MouseGetPos, X, Y
+                    if (Y < (centerY - (divY / 2))) {
+                        IniWrite, -1, routes.rte, %BushName%X, x%a%
+                        IniWrite, -1, routes.rte, %BushName%Y, y%a%
+                        break
+                    }
+                    if (Y > (centerY + (divY / 2))) {
+                        IniWrite, -3, routes.rte, %BushName%X, x%a%
+                        IniWrite, -3, routes.rte, %BushName%Y, y%a%
+                        break
+                    }
+                    if (X < (centerX - (divX / 2))) {
+                        IniWrite, -4, routes.rte, %BushName%X, x%a%
+                        IniWrite, -4, routes.rte, %BushName%Y, y%a%
+                        break
+                    }
+                    if (X > (centerX + (divX / 2))) {
+                        IniWrite, -2, routes.rte, %BushName%X, x%a%
+                        IniWrite, -2, routes.rte, %BushName%Y, y%a%
+                        break
+                    }
+                }
+            }
+
+            a++
+        }
+
+        if (STOP = 1) {
+            IniWrite, -10, routes.rte, %BushName%X, x%a%
+            IniWrite, -10, routes.rte, %BushName%Y, y%a%
+            break
+        }
+
+    }
+
+    MsgBox, Route created succesfully!
+
+return
+
+StartBushPrompt:
+
+    STOP := 0
+
+    Gui, StartBush:New, +AlwaysOnTop
+    Gui, StartBush:Color, 0x353535
+    Gui, StartBush:Font, s8 cFFFFFF, sans-serif
+    Gui, StartBush:Add, Edit, Limit32 vBushName c000000 x10 y10 w180, Route Name
+    Gui, StartBush:Add, Edit, Limit32 vBushLaps Number c000000 x10 y40 w180, Number of Laps
+    Gui, StartBush:Add, Checkbox, vLogout Checked0 x10, Logout?
+    Gui, StartBush:Add, Button, x10 y370 w180 gStartBush, Start Route
+    Gui, StartBush:Show, x%border1X% y%border1Y% w200 h400, `t
+
+return
+
+StartBush:
+
+    Gui, StartBush:Submit
+    IniRead, Route, routes.rte, routes, %BushName%, 0
+
+    a := 0
+    laps := 0
+
+    if (Route = 0) {
+        MsgBox Wrong route name!
+        return
+    }
+
+    Click, %centerX%, %centerY%
+
+    Loop {
+        IniRead, targetX, routes.rte, %Route%X, x%a%, 0
+        IniRead, targetY, routes.rte, %Route%Y, y%a%, 0
+
+        a++
+
+        if (STOP = 1) {
+            return
+        }
+
+        if (targetX = 0 OR targetY = 0) {
+            ;MsgBox, error %Route% %targetX% %targetY%
+            return
+        } else if (targetX < 0 AND targetX > -8) {
+            sleep, 500
+            BlockInput, MouseMove
+            if (targetX = -1) {
+                MouseMove, centerX, centerY - divY
+                sleep, 50
+                Send {End}
+                Click
+            }
+            if (targetX = -2) {
+                MouseMove, centerX + divX, centerY
+                sleep, 50
+                Send {End}
+                Click
+            }
+            if (targetX = -3) {
+                MouseMove, centerX, centerY + divY
+                sleep, 50
+                Send {End}
+                Click
+            }
+            if (targetX = -4) {
+                MouseMove, centerX - divX, centerY
+                sleep, 50
+                Send {End}
+                Click
+            }
+            BlockInput, MouseMoveOff
+            sleep, 200
+        } else if (targetX = -10 OR targetY = -10) {
+            a := 0
+            laps++
+            if (laps >= BushLaps) {
+                if (Logout) {
+                    Send ^{l}
+                    sleep, 500
+                    Send {Enter}
+                }
+                return
+            }
+        } else {
+
+            Loop {
+                playerX := ReadMemory(BASE_ADDRESS + 0xC)
+                playerY := ReadMemory(BASE_ADDRESS + 0x10)
+
+                if (playerX < targetX) {
+                    Send {Right down}
+                } else if (playerX > targetX) {
+                    Send {Left down}
+                }
+
+                if (playerY < targetY) {
+                    Send {Down down}
+                } else if (playerY > targetY) {
+                    Send {Up down}
+                }
+
+                Send {Right up}
+                Send {Left up}
+                Send {Down up}
+                Send {Up up}
+
+                if (playerX = targetX AND playerY = targetY) {
+                    break
+                }
+            }
+
+        }
+
+    }
 
 return
 
@@ -1240,11 +1563,11 @@ return
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
-Numpad1::
+; Numpad1::
 
-    useSkills("10")
+;     useSkills("10")
 
-return
+; return
 
 Numpad2::
 
@@ -1255,7 +1578,7 @@ return
 Numpad4::
 
     
-    useSkills("6>7>8>5>4>9", 1)
+    useSkills("6>7>8>5>4>9", 1, 1)
 
 return
 
@@ -1267,7 +1590,11 @@ return
 
 Numpad6::
 
-    useRevive(1, 1, 1)
+    useReviveMem(1, 1, 1)
+
+return
+
+Numpad9::
 
 return
 
@@ -1281,6 +1608,7 @@ return
 
 ^Esc::
     Reload:
+    BlockInput, MouseMoveOff
     sleep, 700
     Reload
 
