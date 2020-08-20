@@ -7,6 +7,7 @@ SetWorkingDir %A_ScriptDir%
 CoordMode, Pixel, Screen
 CoordMode, ToolTip, Screen
 CoordMode, Mouse, Screen
+SetBatchLines, 10ms
 SetMouseDelay, 15
 firstTimeConfigure := 0
 BlockInput, MouseMove
@@ -447,6 +448,18 @@ getPlayerCoord() {
 
 }
 
+getPokeHealth() {
+
+    a := ReadMemory(BASE_ADDRESS + 0x3E0, "Double") 
+    b := ReadMemory(BASE_ADDRESS + 0x3E8, "Double") * 100
+
+    a := a / b
+    a := a * 100
+
+    return a
+
+}
+
 isOnBattle() {
 
     updateOffsets()
@@ -493,6 +506,8 @@ QPX( N=0 ) { ; Wrapper for QueryPerformanceCounter()by SKAN | CD: 06/Dec/2009
 
 ReadMemory(address, type := "UInt") {
 
+    SetBatchLines, -1
+
     static aTypeSize := {    "UChar":    1,  "Char":     1
                         ,   "UShort":   2,  "Short":    2
                         ,   "UInt":     4,  "Int":      4
@@ -514,6 +529,75 @@ ReadMemory(address, type := "UInt") {
     DllCall("CloseHandle", "Ptr", hProcess)
     
     return success ? result : ""
+
+}
+
+takePokeIn() {
+    
+    SetBatchLines, -1
+    SetMouseDelay, -1
+
+    RevX := pokeMenuX + 20
+    RevY := pokeMenuY + 75
+    MouseGetPos, X, Y
+
+    BlockInput, MouseMove
+    if (pokeIsOut()) {
+        Loop {
+            MouseMove, RevX, RevY
+            sleep, 30
+            Click, right
+            Loop 50 {
+                if (!pokeIsOut()) {
+                    break 2
+                }
+                sleep, 10
+            }
+        }
+    } else if (!pokeIsOut()) {
+        BlockInput, MouseMoveOff
+        return
+    }
+
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+
+    return
+
+}
+
+
+takePokeOut() {
+
+    SetBatchLines, -1
+    SetMouseDelay, -1
+
+    RevX := pokeMenuX + 20
+    RevY := pokeMenuY + 75
+    MouseGetPos, X, Y
+
+    BlockInput, MouseMove
+    if (!pokeIsOut()) {
+		Loop {
+            MouseMove, RevX, RevY
+            sleep, 30
+            Click, right
+            Loop 50 {
+                if (pokeIsOut()) {
+                    break 2
+                }
+                sleep, 10
+            }
+        }
+    } else if (pokeIsOut()) {
+        BlockInput, MouseMoveOff
+        return
+    }
+
+    MouseMove, X, Y
+    BlockInput, MouseMoveOff
+
+    return
 
 }
 
@@ -650,11 +734,11 @@ useRevive(defense := 0, skills := 0, safeMode := 0) {
 useReviveMem(defense := 0, skills := 0, safeMode := 0) {
 
     SetBatchLines, -1
+    SetMouseDelay, -1
 
-    pokeHealth := (ReadMemory(BASE_ADDRESS + 0x3E0, "Double") / ReadMemory(BASE_ADDRESS + 0x3E8, "Double")) * 100
-    if (pokeHealth > 20 AND getBattleElements() > 1 AND safeMode AND isOnBattle()) {
+    if (getPokeHealth() > 20 AND getBattleElements() > 1 AND isOnBattle() AND safeMode) {
         ToolTip, Death risk detected`, press again to use revive, border1X, border1Y
-        sleep, 600
+        sleep, 350
         a := 0
         Loop, 100 {
             sleep, 25
@@ -672,55 +756,35 @@ useReviveMem(defense := 0, skills := 0, safeMode := 0) {
 
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
-    a := 10
+    b := 10
 
     oldSnap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
     Snap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
 
-    if (pokeIsOut() = 1) {
-        BlockInput, MouseMove
-        MouseGetPos, X, Y
-		MouseMove, RevX, RevY
-		sleep, 20
-		Click, right
-    }
-    else if (pokeIsOut() = 0) {
-        BlockInput, MouseMove
-        MouseGetPos, X, Y
-        MouseMove, RevX, RevY
-        sleep, 20
-    }
+    BlockInput, MouseMove
+    MouseGetPos, X, Y
+	MouseMove, RevX, RevY
+	takePokeIn()
 
     oldSnap.TakeSnapshot()
 
     Loop {
         Snap.TakeSnapshot()
+        Send {XButton2}
         if (oldSnap.Compare(Snap) = 0) {
             break
         }
-        Send {XButton2}
     }
 
-    TakePokeOutMem:
+    takePokeOut()
 
-	Loop {
-		if (pokeIsOut() = 0) {
-			Click, right
-        } else {
-		    break
-        }
-	}
-
-    if (skills AND validateSkills(a) > 1) {
-        if (a = 0) {
+    if (skills AND validateSkills(b) > 1) {
+        if (b = 0) {
             skills := 0
-            goto, TakePokeOutMem
+            takePokeOut()
         }
-        sleep, 400
-        a--
-        Click, right
-        sleep, 250
-        goto, TakePokeOutMem
+        takePokeIn()
+        takePokeOut()
     }
 
     if (defense) {
@@ -918,18 +982,12 @@ Configure:
 
     FindSkillMenu:
 
+    takePokeOut()
+    SetMouseDelay, 15
+
     sleep, 500
 
     ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *20 *Trans0x0000FF ./imagesNew/skillMenu.png
-    if (ErrorLevel = 1) {
-        BlockInput, MouseMove
-        MouseMove, pokeMenuX + 20, pokeMenuY + 75
-        sleep, 40
-        MouseClick, Right
-        BlockInput, MouseMoveOff
-        goto, FindSkillMenu
-    }
-
     skillX -= 18
     skillY -= 24
     BlockInput, MouseMove
@@ -1256,6 +1314,8 @@ Test:
     sleep, 1000
 
     a := isOnBattle()
+
+    takePokeOut()
 
     ToolTip, a %a% %pokeMenuX% %pokeMenuY%
 
@@ -1594,7 +1654,15 @@ Numpad6::
 
 return
 
+Numpad7::
+
+    ; takePokeIn()
+
+return
+
 Numpad9::
+
+    takePokeOut()
 
 return
 
