@@ -30,6 +30,7 @@ global playerCoord := []
 global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
 global STOP
 global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill, BushName, BushLaps, Logout
+global pokestop, offensiveAssist, LootDelayAssist, CDOrderAssist, defensiveAssist, safeModeAssist, loadSkillsAssist
 global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10
 global CDOrder
 global BATTLE_BASE_ADDRESS
@@ -41,7 +42,7 @@ Gui, Main:Color, 0x353535
 Gui, Main:Font, s8, sans-serif
 Gui, Main:Add, Button, x10 y267 w40 h20 gReload, Reload
 Gui, Main:Add, Button, x10 y10 w80 h20 gConfigure, Configure
-Gui, Main:Add, Button, x100 y10 w80 h20 gFirstTimeConfigure, New Here?
+Gui, Main:Add, Button, x100 y10 w80 h20 gFastConfigure, Fast Configure
 Gui, Main:Add, StatusBar,, Idle
 Gui, Main:Show, x1 y550 w190 h320, `t
 
@@ -299,6 +300,8 @@ calcScreenCoordByCoordY(Y) {
 
 collectLoot(X, Y, mode = 1, delay = 50) {
 
+    SetMouseDelay, -1
+
     if (mode = 2) {
         a := calcScreenCoordByCoordX(X)
         b := calcScreenCoordByCoordY(Y)
@@ -451,7 +454,7 @@ getPlayerCoord() {
 getPokeHealth() {
 
     a := ReadMemory(BASE_ADDRESS + 0x3E0, "Double") 
-    b := ReadMemory(BASE_ADDRESS + 0x3E8, "Double") * 100
+    b := ReadMemory(BASE_ADDRESS + 0x3E8, "Double")
 
     a := a / b
     a := a * 100
@@ -758,8 +761,8 @@ useReviveMem(defense := 0, skills := 0, safeMode := 0) {
     RevY := pokeMenuY + 75
     b := 10
 
-    oldSnap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
-    Snap := new CGdipSnapshot(pokeMenuX + 40, pokeMenuY + 80, 24, 11)
+    oldSnap := new CGdipSnapshot(pokeMenuX + 60, pokeMenuY + 80, 8, 8)
+    Snap := new CGdipSnapshot(pokeMenuX + 60, pokeMenuY + 80, 8, 8)
 
     BlockInput, MouseMove
     MouseGetPos, X, Y
@@ -832,9 +835,37 @@ useSkills(cds := "", stop := 0, offensive := 0) {
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
 
-FirstTimeConfigure:
+FastConfigure:
 
-    firstTimeConfigure := 1
+    SB_SetText("Finding Screen Border")
+    ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 *Trans0x0000FF ./imagesNew/padrao.png
+    if (ErrorLevel = 1) {
+        ImageSearch, padraoX, padraoY, 0, 0, A_ScreenWidth, A_ScreenHeight, *10 ./imagesNew/padraoLit.png
+        if ErrorLevel = 1
+            goto, FastConfigure
+    }
+    padraoY -= 4
+    IniRead, a, config.ini, vars, padraoX, 0
+    IniRead, b, config.ini, vars, padraoY, 0
+    if (ErrorLevel = 0 AND (a != padraoX OR b != padraoY)) {
+        goto, Configure
+        return
+    }
+    SB_SetText("Finding Skill Menu")
+    ImageSearch, skillX, skillY, 0, 0, A_ScreenWidth, A_ScreenHeight, *20 *Trans0x0000FF ./imagesNew/skillMenu.png
+    if (ErrorLevel = 1) {
+        goto, FastConfigure
+    }
+    skillX -= 18
+    skillY -= 24
+    IniRead, a, config.ini, vars, skillX, 0
+    IniRead, b, config.ini, vars, skillY, 0
+    if (ErrorLevel = 0 AND (a != skillX OR b != skillY)) {
+        goto, Configure
+        return
+    }
+
+    goto, endConfig
 
 Configure:
 
@@ -1011,30 +1042,6 @@ Configure:
 
     SB_SetText("Idle")
 
-    if (firstTimeConfigure = 0) {
-        IniRead, maxX, config.ini, vars, maxX, %A_Space%
-        IniRead, maxY, config.ini, vars, maxY, %A_Space%
-        goto, endConfig
-    }
-
-    ;ToolTip, Use a revive to configure, pokeMenuX, pokeMenuY - 30
-    MsgBox Use a revive to configure
-
-    imgHandle1 := LoadPicture("imagesNew/max.png")
-
-    ConfigRevive:
-
-    ImageSearch, maxX, maxY, padraoX, padraoY - 30, padraoX + 1100, padraoY + 10, *30 *Trans0x0000FF HBITMAP:*%imgHandle1%
-    if ErrorLevel = 1
-        goto, ConfigRevive
-    
-    ToolTip, Success!, pokeMenuX, pokeMenuY - 30
-    sleep, 2000
-    ToolTip
-
-    IniWrite, %maxX%, config.ini, vars, maxX
-    IniWrite, %maxY%, config.ini, vars, maxY
-
     endConfig:
         updateOffsets()
         divX := (border2X - border1X) / 15
@@ -1042,7 +1049,14 @@ Configure:
         centerX := ((border2X - border1X) / 2) + border1X 
         centerY := ((border3Y - border1Y) / 2) + border1Y 
         ;ToolTip, %divX% %divY%
+
+        IniWrite, %padraoX%, config.ini, vars, padraoX
+        IniWrite, %padraoY%, config.ini, vars, padraoY
+        IniWrite, %skillX%, config.ini, vars, skillX
+        IniWrite, %skillY%, config.ini, vars, skillY
+
         Gui, Main:Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
+        Gui, Main:Add, Button, x100 y40 w80 h20 gConfigAssist, Config. Assist
         Gui, Main:Add, Button, x10 y70 w80 h20 gCfgFish, Config. Fishing
         Gui, Main:Add, Button, x10 y100 w80 h20 gNewRoutePrompt, New Route
         Gui, Main:Add, Button, x100 y100 w80 h20 gStartRoutePrompt, Start Route
@@ -1313,11 +1327,11 @@ Test:
     Click, %centerX%, %centerY%
     sleep, 1000
 
-    a := isOnBattle()
+    a := getPokeHealth()
+    b := getBattleElements()
+    c := isOnBattle()
 
-    takePokeOut()
-
-    ToolTip, a %a% %pokeMenuX% %pokeMenuY%
+    ToolTip, a %a% %b% %c%
 
 return
 
@@ -1619,6 +1633,31 @@ Fish:
 
 return
 
+ConfigAssist:
+
+    Gui, Assist:New, +AlwaysOnTop
+    Gui, Assist:Color, 0x353535
+    Gui, Assist:Font, s8, sans-serif
+    Gui, Assist:Add, Edit, Limit32 vCDOrderAssist c000000 x10 y10 w180, Skill Order: 1>2>3>4>5
+    Gui, Assist:Add, Checkbox, vpokestop Checked0 x10 y40 cFFFFFF, Use !pokestop?
+    Gui, Assist:Add, Checkbox, voffensiveAssist Checked0 x10 y60 cFFFFFF, Toggle offensive?
+    Gui, Assist:Add, GroupBox, x10 y80 w180 h1
+    Gui, Assist:Add, Edit, Limit5 vLootDelayAssist c000000 x10 y90 w180, Loot delay in ms
+    Gui, Assist:Add, GroupBox, x10 y115 w180 h1
+    Gui, Assist:Add, Checkbox, vdefensiveAssist Checked0 x10 y125 cFFFFFF, Toggle defensive?
+    Gui, Assist:Add, Checkbox, vloadSkillsAssist Checked0 x10 y145 cFFFFFF, Load skills?
+    Gui, Assist:Add, Checkbox, vsafeModeAssist Checked0 x10 y165 cFFFFFF, Safe mode?
+    Gui, Assist:Add, Button, x10 y370 w180 gSaveAssist, Save
+    Gui, Assist:Show, x%border1X% y%border1Y% w200 h400, `t
+    
+return
+
+SaveAssist:
+
+    Gui, Assist:Submit
+
+return
+
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -1637,20 +1676,19 @@ return
 
 Numpad4::
 
-    
-    useSkills("6>7>8>5>4>9", 1, 1)
+    useSkills(CDOrderAssist, pokestop, offensiveAssist)
 
 return
 
 Numpad5::
 
-    collectLoot(centerX, centerY)
+    collectLoot(centerX, centerY,, LootDelayAssist)
 
 return
 
 Numpad6::
 
-    useReviveMem(1, 1, 1)
+    useReviveMem(defensiveAssist, loadSkillsAssist, safeModeAssist)
 
 return
 
@@ -1666,6 +1704,12 @@ Numpad9::
 
 return
 
+Pause::
+
+    ExitApp
+
+return
+
 ^Space::
 
     ToolTip
@@ -1677,7 +1721,7 @@ return
 ^Esc::
     Reload:
     BlockInput, MouseMoveOff
-    sleep, 700
+    sleep, 500
     Reload
 
 return
