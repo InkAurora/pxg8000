@@ -27,15 +27,20 @@ global divX, divY, playerX, playerY, centerX, centerY
 global imgHandle, imgHandle1, imgHandle2
 global border1X, border1Y, border2X, border2Y, border3X, border3Y, border4X, border4Y
 global playerCoord := []
-global SQM = [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
+global SQM := [] ; [sqmX, sqmY, sqmXCenter, sqmYCenter, sqmXLow, sqmYLow, sqmXHigh, sqmYHigh]
+global POKEBAG := []
+global POKEBAG_SNAPSHOTS := []
+global POKEBAG_TEMP := []
 global STOP
 global RouteName, MaxLure, CheckLoot, CheckRevive, CheckDefenseCd, DefenseSkill, BushName, BushLaps, Logout
 global pokestop, offensiveAssist, LootDelayAssist, CDOrderAssist, defensiveAssist, safeModeAssist, loadSkillsAssist
 global CheckSkill1, CheckSkill2, CheckSkill3, CheckSkill4, CheckSkill5, CheckSkill6, CheckSkill7, CheckSkill8, CheckSkill9, CheckSkill10
-global CDOrder
+global CDOrder, isMounted
 global BATTLE_BASE_ADDRESS
 global IS_ON_BATTLE
 global POKE_IS_OUT
+
+global MaxSkill := 10
 
 Gui, Main:New, +AlwaysOnTop
 Gui, Main:Color, 0x353535
@@ -298,6 +303,69 @@ calcScreenCoordByCoordY(Y) {
 
 }
 
+changePokemon(pokemonToEquip) {
+
+    SetBatchLines, -1
+    SetMouseDelay, -1
+
+    MouseGetPos, X, Y
+
+    snapPokebag0 := new CGdipSnapshot(pokeMenuX + 7, pokeMenuY + 61, 28, 28)
+    snapPokebag0.TakeSnapshot()
+    snapPokebag1 := new CGdipSnapshot(pokeMenuX + 7, pokeMenuY + 126, 28, 28)
+    snapPokebag1.TakeSnapshot()
+    snapPokebag2 := new CGdipSnapshot(pokeMenuX + 41, pokeMenuY + 126, 28, 28)
+    snapPokebag2.TakeSnapshot()
+    snapPokebag3 := new CGdipSnapshot(pokeMenuX + 75, pokeMenuY + 126, 28, 28)
+    snapPokebag3.TakeSnapshot()
+    snapPokebag4 := new CGdipSnapshot(pokeMenuX + 109, pokeMenuY + 126, 28, 28)
+    snapPokebag4.TakeSnapshot()
+
+    POKEBAG_TEMP[0] := snapPokebag0
+    POKEBAG_TEMP[1] := snapPokebag1
+    POKEBAG_TEMP[2] := snapPokebag2
+    POKEBAG_TEMP[3] := snapPokebag3
+    POKEBAG_TEMP[4] := snapPokebag4
+
+    if (isMounted) {
+        mount()
+        isMounted := 0
+        sleep, 450
+    }
+
+    MouseMove, pokeMenuX + 20, pokeMenuY + 75
+    takePokeIn()
+
+    i := 0
+    While (i < 5) {
+        if (pokemonToEquip = POKEBAG[i]) {
+            j := 0
+            While (j < 5) {
+                if (POKEBAG_SNAPSHOTS[i].Compare(POKEBAG_TEMP[j], 80)) {
+                    MouseMove, POKEBAG_TEMP[j]._Coords.x + 14, POKEBAG_TEMP[j]._Coords.y + 14
+                    sleep, 100
+                    MouseClick,,,,,, D
+                    MouseMove, pokeMenuX + 20, pokeMenuY + 75
+                    sleep, 100
+                    MouseClick,,,,,, U
+                    takePokeOut()
+                    MouseMove, X, Y
+                    return 1
+                }
+                j++
+            }
+        }
+        i++
+    }
+
+    takePokeOut()
+
+    MouseMove, X, Y
+
+    return 0
+
+}
+
 collectLoot(X, Y, mode = 1, delay = 50) {
 
     SetMouseDelay, -1
@@ -424,6 +492,30 @@ collectLoot(X, Y, mode = 1, delay = 50) {
 
 }
 
+compareSnap(X, Y, snap1, snap2, tolerance) {
+
+    SetBatchLines, -1
+
+    i := X
+    k := 0
+    Loop % snap2._Coords.w {
+        j := Y
+        l := 0
+        Loop % snap2._Coords.h {
+            if (!snap1.PixelSnap[i, j].Compare(snap2.PixelSnap[k, l], tolerance)) {
+                return 0
+            }
+            j++
+            l++
+        }
+        i++
+        k++
+    }
+
+    return 1
+
+}
+
 findPath() {
 
     
@@ -463,6 +555,42 @@ getPokeHealth() {
 
 }
 
+getSlotCoords(byref X, byref Y, slot) {
+
+
+
+}
+
+imageFind(byref X, byref Y, X1, Y1, X2, Y2, snapshot, tolerance) {
+
+    SetBatchLines, -1
+
+    X2 := X2 - X1
+    Y2 := Y2 - Y1
+
+    snapTemp := new CGdipSnapshot(X1, Y1, X2, Y2)
+    snapTemp.TakeSnapshot()
+
+    i := 0
+    Loop % snapTemp._Coords.w {
+        j := 0
+        Loop % snapTemp._Coords.h {
+            if (snapTemp.PixelSnap[i, j].Compare(snapshot.PixelSnap[0, 0], tolerance)) {
+                if (compareSnap(i, j, snapTemp, snapshot, tolerance)) {
+                    X := i + X1
+                    Y := j + Y1
+                    return 1
+                }
+            }
+            j++
+        }
+        i++
+    }
+
+    return 0
+
+}
+
 isOnBattle() {
 
     updateOffsets()
@@ -484,6 +612,26 @@ loopParseMatch(var, match) {
     }
 
     return 0
+}
+
+mount() {
+
+    MouseGetPos, X, Y
+
+    if (isMounted != 1) {
+        While (isOnBattle()) {
+
+        }
+    }
+
+    Send ^{7}
+
+    if (isMounted != 1) {
+        isMounted := 1
+    }
+
+    return    
+
 }
 
 pokeIsOut() {
@@ -546,11 +694,11 @@ takePokeIn() {
 
     BlockInput, MouseMove
     if (pokeIsOut()) {
+        MouseMove, RevX, RevY
         Loop {
-            MouseMove, RevX, RevY
             sleep, 30
             Click, right
-            Loop 50 {
+            Loop, 50 {
                 if (!pokeIsOut()) {
                     break 2
                 }
@@ -759,7 +907,7 @@ useReviveMem(defense := 0, skills := 0, safeMode := 0) {
 
     RevX := pokeMenuX + 20
     RevY := pokeMenuY + 75
-    b := 10
+    b := MaxSkill
 
     oldSnap := new CGdipSnapshot(pokeMenuX + 60, pokeMenuY + 80, 8, 8)
     Snap := new CGdipSnapshot(pokeMenuX + 60, pokeMenuY + 80, 8, 8)
@@ -781,13 +929,17 @@ useReviveMem(defense := 0, skills := 0, safeMode := 0) {
 
     takePokeOut()
 
-    if (skills AND validateSkills(b) > 1) {
-        if (b = 0) {
-            skills := 0
+    Loop, 3 {
+        if (skills AND validateSkills(b) > 0) {
+            if (b = 0) {
+                skills := 0
+                takePokeOut()
+            }
+            takePokeIn()
             takePokeOut()
+        } else if (skills AND !validateSkills(b)) {
+            break
         }
-        takePokeIn()
-        takePokeOut()
     }
 
     if (defense) {
@@ -864,6 +1016,21 @@ FastConfigure:
         goto, Configure
         return
     }
+
+    IniRead, border1X, config.ini, vars, border1X, 0
+    IniRead, border1Y, config.ini, vars, border1Y, 0
+    IniRead, border2X, config.ini, vars, border2X, 0
+    IniRead, border2Y, config.ini, vars, border2Y, 0
+    IniRead, border3X, config.ini, vars, border3X, 0
+    IniRead, border3Y, config.ini, vars, border3Y, 0
+    IniRead, border4X, config.ini, vars, border4X, 0
+    IniRead, border4Y, config.ini, vars, border4Y, 0
+    IniRead, minimapX, config.ini, vars, minimapX, 0
+    IniRead, minimapY, config.ini, vars, minimapY, 0
+    IniRead, pokeMenuX, config.ini, vars, pokeMenuX, 0
+    IniRead, pokeMenuY, config.ini, vars, pokeMenuY, 0
+    IniRead, battleMenuX, config.ini, vars, battleMenuX, 0
+    IniRead, battleMenuY, config.ini, vars, battleMenuY, 0
 
     goto, endConfig
 
@@ -1040,9 +1207,10 @@ Configure:
     skillY -= 24
     BlockInput, MouseMoveOff
 
-    SB_SetText("Idle")
-
     endConfig:
+
+        SB_SetText("Idle")
+
         updateOffsets()
         divX := (border2X - border1X) / 15
         divY := (border3Y - border1Y) / 11
@@ -1054,6 +1222,20 @@ Configure:
         IniWrite, %padraoY%, config.ini, vars, padraoY
         IniWrite, %skillX%, config.ini, vars, skillX
         IniWrite, %skillY%, config.ini, vars, skillY
+        IniWrite, %border1X%, config.ini, vars, border1X
+        IniWrite, %border1Y%, config.ini, vars, border1Y
+        IniWrite, %border2X%, config.ini, vars, border2X
+        IniWrite, %border2Y%, config.ini, vars, border2Y
+        IniWrite, %border3X%, config.ini, vars, border3X
+        IniWrite, %border3Y%, config.ini, vars, border3Y
+        IniWrite, %border4X%, config.ini, vars, border4X
+        IniWrite, %border4Y%, config.ini, vars, border4Y
+        IniWrite, %minimapX%, config.ini, vars, minimapX
+        IniWrite, %minimapY%, config.ini, vars, minimapY
+        IniWrite, %pokeMenuX%, config.ini, vars, pokeMenuX
+        IniWrite, %pokeMenuY%, config.ini, vars, pokeMenuY
+        IniWrite, %battleMenuX%, config.ini, vars, battleMenuX
+        IniWrite, %battleMenuY%, config.ini, vars, battleMenuY
 
         Gui, Main:Add, Button, x10 y40 w80 h20 gUseRevive, Use revive
         Gui, Main:Add, Button, x100 y40 w80 h20 gConfigAssist, Config. Assist
@@ -1062,6 +1244,7 @@ Configure:
         Gui, Main:Add, Button, x100 y100 w80 h20 gStartRoutePrompt, Start Route
         Gui, Main:Add, GroupBox, x10 y130 w170 h1
         Gui, Main:Add, Button, x10 y145 w80 h20 gTest, Test
+        Gui, Main:Add, Button, x100 y145 w80 h20 gConfigPokebag, Set Pokebag
         Gui, Main:Add, Button, x10 y175 w80 h20 gCfgBush, Config. Bush
         Gui, Main:Add, Button, x100 y175 w80 h20 gStartBushPrompt, Collect Bushes
         ; ToolTip, %border1X% %border1Y% %border2X% %border2Y% %border3X% %border3Y% %border4X% %border4Y%
@@ -1319,19 +1502,6 @@ return
 UseRevive:
 
     useReviveMem(1, 1)
-
-return
-
-Test:
-
-    Click, %centerX%, %centerY%
-    sleep, 1000
-
-    a := getPokeHealth()
-    b := getBattleElements()
-    c := isOnBattle()
-
-    ToolTip, a %a% %b% %c%
 
 return
 
@@ -1658,6 +1828,53 @@ SaveAssist:
 
 return
 
+ConfigPokebag:
+
+    ToolTip, Arrange your pokemon in the following order:`nMain Slot: Damage`n1st Slot: Healer`n2nd Slot: Silence/Stun`n3rd Slot: Ride`n4th Slot: Fly`nThen press Ctrl+Space, border1X, border1Y
+
+    STOP := 0
+    While (!STOP) {
+
+    }
+
+    snapPokebag0 := new CGdipSnapshot(pokeMenuX + 7, pokeMenuY + 61, 28, 28)
+    snapPokebag0.TakeSnapshot()
+    snapPokebag1 := new CGdipSnapshot(pokeMenuX + 7, pokeMenuY + 126, 28, 28)
+    snapPokebag1.TakeSnapshot()
+    snapPokebag2 := new CGdipSnapshot(pokeMenuX + 41, pokeMenuY + 126, 28, 28)
+    snapPokebag2.TakeSnapshot()
+    snapPokebag3 := new CGdipSnapshot(pokeMenuX + 75, pokeMenuY + 126, 28, 28)
+    snapPokebag3.TakeSnapshot()
+    snapPokebag4 := new CGdipSnapshot(pokeMenuX + 109, pokeMenuY + 126, 28, 28)
+    snapPokebag4.TakeSnapshot()
+
+    POKEBAG[0] := "damage"
+    POKEBAG[1] := "heal"
+    POKEBAG[2] := "silence"
+    POKEBAG[3] := "ride"
+    POKEBAG[4] := "fly"
+
+    POKEBAG_SNAPSHOTS[0] := snapPokebag0
+    POKEBAG_SNAPSHOTS[1] := snapPokebag1
+    POKEBAG_SNAPSHOTS[2] := snapPokebag2
+    POKEBAG_SNAPSHOTS[3] := snapPokebag3
+    POKEBAG_SNAPSHOTS[4] := snapPokebag4
+
+    ToolTip, Success!, border1X, border1Y
+    sleep, 1000
+    ToolTip
+
+return
+
+Test:
+
+    Click, %centerX%, %centerY%
+    sleep, 1000
+
+    a := changePokemon("damage")
+
+return
+
 ; Hotkeys
 ; -------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------------------------------------------------------------------------------------
@@ -1671,6 +1888,12 @@ return
 Numpad2::
 
     useMedicine()
+
+return
+
+Numpad3::
+
+    takePokeOut()
 
 return
 
@@ -1694,13 +1917,60 @@ return
 
 Numpad7::
 
-    ; takePokeIn()
+    changePokemon("damage")
+
+return
+
+Numpad8::
+
+    changePokemon("heal")
+    useSkills("7")
 
 return
 
 Numpad9::
 
-    takePokeOut()
+    changePokemon("fly")
+    sleep, 150
+    mount()
+
+return
+
+NumpadSub::
+
+    changePokemon("ride")
+    sleep, 150
+    mount()
+
+return
+
+^Numpad3::
+
+    mount()
+
+return
+
+^NumpadAdd::
+
+    if (MaxSkill < 10) {
+        MaxSkill++
+    }
+
+    ToolTip, Number of Skills: %MaxSkill%, border1X, border1Y
+    sleep, 750
+    ToolTip
+
+return
+
+^NumpadSub::
+
+    if (MaxSkill > 1) {
+        MaxSkill--
+    }
+
+    ToolTip, Number of Skills: %MaxSkill%, border1X, border1Y
+    sleep, 750
+    ToolTip
 
 return
 
