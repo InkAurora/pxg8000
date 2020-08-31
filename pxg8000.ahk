@@ -733,7 +733,7 @@ takePokeOut() {
             MouseMove, RevX, RevY
             sleep, 30
             Click, right
-            Loop 50 {
+            Loop, 50 {
                 if (pokeIsOut()) {
                     break 2
                 }
@@ -780,6 +780,9 @@ validateSkills(skillCount := 10) {
 }
 
 useMedicine() {
+
+    SetBatchLines, -1
+    SetMouseDelay, -1
 
     BlockInput, MouseMove
     MouseGetPos, X, Y
@@ -896,6 +899,7 @@ useReviveMem(defense := 0, skills := 0, safeMode := 0) {
             if (GetKeyState("Numpad6", "P")) {
                 ToolTip
                 a := 1
+                skills := 0
                 break
             }
         }
@@ -1978,6 +1982,10 @@ Pause::
 
     ExitApp
 
+return
+
+ScrollLock::
+    Suspend, -1
 return
 
 ^Space::
